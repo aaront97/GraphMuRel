@@ -1,0 +1,9 @@
+[submodule "murel.bootstrap.pytorch"]
+	path = murel.bootstrap.pytorch
+	url = https://github.com/Cadene/murel.bootstrap.pytorch.git
+[submodule "block.bootstrap.pytorch"]
+	path = block.bootstrap.pytorch
+	url = https://github.com/Cadene/block.bootstrap.pytorch
+[submodule "bootstrap.pytorch"]
+	path = bootstrap.pytorch
+	url = https://github.com/Cadene/bootstrap.pytorch
