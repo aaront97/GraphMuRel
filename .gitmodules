@@ -7,3 +7,6 @@
 [submodule "bootstrap.pytorch"]
 	path = bootstrap.pytorch
 	url = https://github.com/Cadene/bootstrap.pytorch
+[submodule "faster-rcnn.pytorch"]
+	path = faster-rcnn.pytorch
+	url = https://github.com/jwyang/faster-rcnn.pytorch
