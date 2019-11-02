@@ -3,15 +3,14 @@ from torch.utils.data import Dataset
 import os 
 import progressbar
 import json
-from collections import Counter
 import re
-import codecs
+import subprocess
 
 class AbstractVQADataset(Dataset):
 	def __init__(self, 
 		processed_dir='data/processed_splits', 
 		model='baseline',
-		root_dir='D:/VQA/',
+		root_dir='/media/bat34/Elements/VQA',
 		no_answers=3000,
 		sample_answers=False,
 		skipthoughts_dir='data/skipthoughts'):
@@ -115,7 +114,7 @@ class AbstractVQADataset(Dataset):
 	def add_question_ids(self, split_set, word_to_wid):
 		questions_list = split_set['questions']
 		for question_dict in questions_list:
-			question_ids = [word_to_wid[word] for word in question_dict['question_tokens_UNK']]
+			question_dict['question_ids'] = [word_to_wid[word] for word in question_dict['question_tokens_UNK']]
 		return split_set
 
 	def remove_question_if_not_top_answer(self, split_set, ans_to_aid):
@@ -203,7 +202,7 @@ class AbstractVQADataset(Dataset):
 		print('Saving processed datasets...')
 
 		if not os.path.exists(self.processed_dir):
-			os.system('mkdir "' + self.processed_dir + '"')
+			subprocess.run(['mkdir', '-p'] + [self.processed_dir])
 
 		torch.save(train_set, os.path.join(self.processed_dir, 'train2014_processed.pth'))
 		torch.save(val_set, os.path.join(self.processed_dir, 'val2014_processed.pth'))
