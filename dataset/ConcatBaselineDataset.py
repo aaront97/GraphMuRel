@@ -1,7 +1,7 @@
 from . import AbstractVQADataset
 import torch
 import os
-from .TextEncFactory import get_text_enc
+from TextEncFactory import get_text_enc
 import transforms.transforms as transforms
 class ConcatBaselineDataset(AbstractVQADataset):
     def __init__(self, \
