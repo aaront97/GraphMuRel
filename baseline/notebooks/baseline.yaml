@@ -1,0 +1,5 @@
+baseline_options:
+    dropout: 0.25
+    txt_enc: "BayesianUniSkip"
+    
+    
