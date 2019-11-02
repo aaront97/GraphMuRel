@@ -4,10 +4,10 @@ import os
 from .TextEncFactory import get_text_enc
 import transforms.transforms as transforms
 class ConcatBaselineDataset(AbstractVQADataset):
-	def __init__(self, 
-              preprocessed_images_dir='~/VQA/BaselineTraining',
-              split='train',
-              ROOT_DIR='/auto/homes/bat34/VQA_PartII/',
+    def __init__(self, \
+              preprocessed_images_dir='~/VQA/BaselineTraining', \
+              split='train', \
+              ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
               txt_enc='BayesianUniSkip'):
         #TODO: include skipthoughts dropout?
         super(ConcatBaselineDataset, self).__init__()
