@@ -2,6 +2,7 @@ from . import AbstractVQADataset
 import torch
 import os
 from .TextEncFactory import get_text_enc
+import transforms.transforms as transforms
 class ConcatBaselineDataset(AbstractVQADataset):
 	def __init__(self, 
               preprocessed_images_dir='~/VQA/BaselineTraining',
@@ -10,6 +11,10 @@ class ConcatBaselineDataset(AbstractVQADataset):
               txt_enc='BayesianUniSkip'):
         #TODO: include skipthoughts dropout?
         super(ConcatBaselineDataset, self).__init__()
+        self.collate_fn = transforms.Compose([
+                transforms.ConvertBatchListToDict,
+                transforms.CreateBatchItem
+                ])
         self.image_features = torch.load( \
                os.path.join(preprocessed_images_dir, split, \
                 'baseline_{}_cnn_features.pth'.format(split)))
