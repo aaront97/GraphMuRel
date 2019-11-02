@@ -4,10 +4,10 @@ class TextEncFactory:
     def get_text_enc(skipthoughts_dir, text_enc, vocab):
         if text_enc == 'BayesianUniSkip':
             return BayesianUniSkip(skipthoughts_dir, vocab)
-         if text_enc == 'UniSkip':
+        if text_enc == 'UniSkip':
             return UniSkip(skipthoughts_dir, vocab)
-         if text_enc == 'BiSkip':
+        if text_enc == 'BiSkip':
             return BiSkip(skipthoughts_dir, vocab)
-         if text_enc == 'DropUniSkip':
+        if text_enc == 'DropUniSkip':
             return DropUniSkip(skipthoughts_dir, vocab)
         
