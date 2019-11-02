@@ -1,11 +1,11 @@
-from . import AbstractVQADataset
+from .AbstractVQADataset import AbstractVQADataset
 import torch
 import os
 from dataset.TextEncFactory import get_text_enc
 import transforms.transforms as transforms
 class ConcatBaselineDataset(AbstractVQADataset):
     def __init__(self, \
-              preprocessed_images_dir='~/VQA/BaselineTraining', \
+              preprocessed_images_dir='auto/homes/bat34/VQA/BaselineTraining', \
               split='train', \
               ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
               txt_enc='BayesianUniSkip'):

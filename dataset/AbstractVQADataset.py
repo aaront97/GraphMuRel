@@ -7,12 +7,12 @@ import re
 import subprocess
 
 class AbstractVQADataset(Dataset):
-	def __init__(self, 
-		processed_dir='data/processed_splits', 
-		model='baseline',
-		root_dir='/media/bat34/Elements/VQA',
-		no_answers=3000,
-		sample_answers=False,
+	def __init__(self, \
+		processed_dir='data/processed_splits', \
+		model='baseline',\
+		root_dir='/media/bat34/Elements/VQA',\
+		no_answers=3000,\
+		sample_answers=False,\
 		skipthoughts_dir='data/skipthoughts'):
 
 		#Todo: Rationalise sampling answers?
