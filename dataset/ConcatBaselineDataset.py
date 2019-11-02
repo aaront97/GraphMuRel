@@ -11,15 +11,14 @@ class ConcatBaselineDataset(AbstractVQADataset):
               txt_enc='BayesianUniSkip'):
         #TODO: include skipthoughts dropout?
         super(ConcatBaselineDataset, self).__init__()
-        self.collate_fn = transforms.Compose([
-                transforms.ConvertBatchListToDict,
-                transforms.CreateBatchItem
+        self.collate_fn = transforms.Compose([ \
+                transforms.ConvertBatchListToDict, \
+                transforms.CreateBatchItem \
                 ])
         self.image_features = torch.load( \
                os.path.join(preprocessed_images_dir, split, \
                 'baseline_{}_cnn_features.pth'.format(split)))
         
-        self.skipthoughts_dropout = skipthoughts_dropout
         self.split = split
         skipthoughts_dir = os.path.join(ROOT_DIR, 'data', 'skipthoughts')
         self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, self.wid_to_word)
@@ -29,9 +28,8 @@ class ConcatBaselineDataset(AbstractVQADataset):
             self.dataset = self.val_set
         if split == 'test':
             self.dataset = self.test_set
-        
-        
-	def __getitem__(self, idx):
+
+    def __getitem__(self, idx):
         item = {}
         question = self.dataset['questions'][idx]
         item['index'] = idx
@@ -51,10 +49,10 @@ class ConcatBaselineDataset(AbstractVQADataset):
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])
             item['answer'] = annotation['most_frequent_answer']
             item['question_type'] = annotation['question_type']
-        concat_vector = torch.cat((image_vector, question_vector), 0)]
+        concat_vector = torch.cat((image_vector, question_vector), 0)
         item['concat_vector'] = concat_vector
         return item
         
-	def __len__(self):
+    def __len__(self):
         return len(self.dataset['questions'])
 
