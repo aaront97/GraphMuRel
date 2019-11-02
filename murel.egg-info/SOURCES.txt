@@ -1,0 +1,13 @@
+setup.py
+baseline/__init__.py
+baseline/models/ConcatBaselineNet.py
+baseline/models/__init__.py
+dataset/AbstractVQADataset.py
+dataset/ConcatBaselineDataset.py
+dataset/TextEncFactory.py
+dataset/__init__.py
+murel.egg-info/PKG-INFO
+murel.egg-info/SOURCES.txt
+murel.egg-info/dependency_links.txt
+murel.egg-info/top_level.txt
+transforms/__init__.py

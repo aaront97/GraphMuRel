@@ -6,12 +6,16 @@ class ConcatBaselineDataset(AbstractVQADataset):
 	def __init__(self, 
               preprocessed_images_dir='~/VQA/BaselineTraining',
               split='train',
-              ROOT_DIR='~/VQA_PartII/',
+              ROOT_DIR='/auto/homes/bat34/VQA_PartII/',
               txt_enc='BayesianUniSkip'):
+        #TODO: include skipthoughts dropout?
         super(ConcatBaselineDataset, self).__init__()
         self.image_features = torch.load( \
                os.path.join(preprocessed_images_dir, split, \
                 'baseline_{}_cnn_features.pth'.format(split)))
+        
+        self.skipthoughts_dropout = skipthoughts_dropout
+        self.split = split
         skipthoughts_dir = os.path.join(ROOT_DIR, 'data', 'skipthoughts')
         self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, self.wid_to_word)
         if split == 'train':
@@ -23,7 +27,11 @@ class ConcatBaselineDataset(AbstractVQADataset):
         
         
 	def __getitem__(self, idx):
+        item = {}
         question = self.dataset['questions'][idx]
+        item['index'] = idx
+        item['question_id'] = question['question_id']
+        item['image_name'] = question['image_name']
         question_ids = torch.LongTensor(question['question_ids'])
         image_name = question['image_name']
         question_vector = self.text_enc([question_ids], [len(question_ids)])
@@ -33,9 +41,14 @@ class ConcatBaselineDataset(AbstractVQADataset):
         #Size 2048
         image_vector = self.image_features[image_name]
         #Size 4448
-        training_vector = torch.cat((image_vector, question_vector), 0)
-        answer = self.dataset['annotations'][idx]['answer_id']
-        return (training_vector, answer)
+        if self.split != 'test':
+            annotation = self.dataset['annotations'][idx]
+            item['answer_id'] = torch.LongTensor([annotation['answer_id']])
+            item['answer'] = annotation['most_frequent_answer']
+            item['question_type'] = annotation['question_type']
+        concat_vector = torch.cat((image_vector, question_vector), 0)]
+        item['concat_vector'] = concat_vector
+        return item
         
 	def __len__(self):
         return len(self.dataset['questions'])
