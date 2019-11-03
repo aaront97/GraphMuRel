@@ -50,10 +50,10 @@ def log_training_results(engine, train_loader, evaluator, writer, size):
         evaluator.run(train_loader)
         metrics = evaluator.state.metrics
         avg_accuracy = metrics['accuracy']
-        avg_nll = metrics['nll']
+        avg_cross_entropy = metrics['cross_entropy']
         print("Depth {}: Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-              .format(size, engine.state.epoch, avg_accuracy, avg_nll))
-        writer.add_scalar("{}/training/avg_loss".format(size), avg_nll, engine.state.epoch)
+              .format(size, engine.state.epoch, avg_accuracy, avg_cross_entropy))
+        writer.add_scalar("{}/training/avg_loss".format(size), avg_cross_entropy, engine.state.epoch)
         writer.add_scalar("{}/training/avg_accuracy".format(size), avg_accuracy, engine.state.epoch)
 
 #TODO: IMPROVE THIS, A HACK
@@ -68,9 +68,9 @@ def log_and_checkpoint_validation_results(engine, val_loader, evaluator, \
         evaluator.run(val_loader)
         metrics = evaluator.state.metrics
         avg_accuracy = metrics['accuracy']
-        avg_nll = metrics['cross_entropy']
+        avg_cross_entropy = metrics['cross_entropy']
         print("Depth {}: Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-              .format(size, engine.state.epoch, avg_accuracy, avg_nll))
+              .format(size, engine.state.epoch, avg_accuracy, avg_cross_entropy))
         if engine.state.epoch % checkpoint_every == 0:
             out_name = model_name + "_epoch_{}.pth"
             torch.save(model.state_dict, os.path.join(model_dir, out_name))
@@ -78,7 +78,7 @@ def log_and_checkpoint_validation_results(engine, val_loader, evaluator, \
             out_name = model_name + "BEST.pth"
             torch.save(model.state_dict, os.path.join(model_dir, out_name))
             max_accuracy = avg_accuracy
-        writer.add_scalar("{}/validation/avg_loss".format(size), avg_nll, engine.state.epoch)
+        writer.add_scalar("{}/validation/avg_loss".format(size), avg_cross_entropy, engine.state.epoch)
         writer.add_scalar("{}/validation/avg_accuracy".format(size), avg_accuracy, engine.state.epoch)
         
 
@@ -121,7 +121,7 @@ def run():
         trainer = create_supervised_trainer(model, optimizer, F.cross_entropy, device=device)
         evaluator = create_supervised_evaluator(model,
                                             metrics={'accuracy': Accuracy(),
-                                                     'nll': Loss(F.cross_entropy)},
+                                                     'cross_entropy': Loss(F.cross_entropy)},
                                             device=device)
         trainer.add_event_handler(Events.EPOCH_COMPLETED, log_training_results, train_loader, \
                                   evaluator, writer, size)
