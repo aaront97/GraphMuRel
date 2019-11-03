@@ -96,12 +96,10 @@ def run():
     val_dataset = ConcatBaselineDataset(split="val", txt_enc=config['txt_enc'])
     train_loader = DataLoader(train_dataset, shuffle=True, \
                               batch_size=config['batch_size'], \
-                              collate_fn=train_dataset.collate_fn, \
-                              num_workers=4)
+                              collate_fn=train_dataset.collate_fn)
     val_loader = DataLoader(val_dataset, shuffle=True, \
                             batch_size=config['batch_size'], \
-                            collate_fn=val_dataset.collate_fn, \
-                            num_workers=4)
+                            collate_fn=val_dataset.collate_fn)
     input_dim = list(train_dataset[0]['concat_vector'].size())[0]
     out_dim = len(train_dataset.ans_to_aid)
     
