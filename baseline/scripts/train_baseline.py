@@ -86,7 +86,7 @@ def run():
         config = yaml.load(f)
     config = config['baseline_options']
     ROOT_DIR = 'auto/homes/bat34/VQA_PartII/baseline/'
-    option_dir_name = get_option_directory(config, ["dropout", "batch_size", "lr", "weight_decay", "momentum"])
+    option_dir_name = get_option_directory(config, ["dropout", "batch_size", "lr", "weight_decay"])
     logdir = os.path.join(ROOT_DIR, "logs", option_dir_name)
     writer = SummaryWriter(logdir=logdir)
     max_depth = config['max_depth']
