@@ -11,6 +11,7 @@ from baseline.models.ConcatBaselineNet import ConcatBaselineNet
 from tensorboardX import SummaryWriter
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
+from ignite.contrib.handlers.tqdm_logger import ProgressBar
 import transforms.transforms as trfm
 import subprocess
 
@@ -55,6 +56,12 @@ def log_training_results(engine, train_loader, evaluator, writer, size):
               .format(size, engine.state.epoch, avg_accuracy, avg_cross_entropy))
         writer.add_scalar("{}/training/avg_loss".format(size), avg_cross_entropy, engine.state.epoch)
         writer.add_scalar("{}/training/avg_accuracy".format(size), avg_accuracy, engine.state.epoch)
+          
+def log_iteration_results(engine, train_loader, writer, size):
+    iter = (engine.state.iteration - 1) % len(train_loader) + 1
+    if iter % 50 == 0:
+        print("Epoch[{}] Iteration[{}/{}] Loss: {:.2f}".format(engine.state.epoch, iter, len(train_loader), engine.state.output))
+    writer.add_scalar("{}/training/loss".format(size), engine.state.output, engine.state.iteration)
 
 #TODO: IMPROVE THIS, A HACK
 max_accuracy = -1
@@ -91,7 +98,9 @@ def run():
     logdir = os.path.join(ROOT_DIR, "logs", option_dir_name)
     writer = SummaryWriter(logdir=logdir)
     max_depth = config['max_depth']
+    min_depth = config['min_depth']
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    print('CUDA AVAILABILITY: {}, Device used: {}'.format(torch.cuda.is_available(), device))
     
     train_dataset = ConcatBaselineDataset(split="train", txt_enc=config['txt_enc'])
     val_dataset = ConcatBaselineDataset(split="val", txt_enc=config['txt_enc'])
@@ -110,25 +119,30 @@ def run():
     out_dim = len(train_dataset.ans_to_aid)
     
     
-    for size in range(1, max_depth + 1):
+    for size in range(min_depth, max_depth + 1):
         print('Current depth: {}'.format(size))
         hidden_list = get_hidden_layer_list(input_dim, out_dim, size)
         model = ConcatBaselineNet(input_dim, out_dim, \
                                       hidden_list, \
                                       dropout=config['dropout'])
+        model = model.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'],\
                                      weight_decay=config['weight_decay'])
+        
         trainer = create_supervised_trainer(model, optimizer, F.cross_entropy, device=device)
-        evaluator = create_supervised_evaluator(model,
+        evaluator = create_supervised_evaluator(model,\
                                             metrics={'accuracy': Accuracy(),
-                                                     'cross_entropy': Loss(F.cross_entropy)},
+                                                     'cross_entropy': Loss(F.cross_entropy)},\
                                             device=device)
+        pbar_train = ProgressBar()
+        pbar_train.attach(trainer, ['loss'])
         trainer.add_event_handler(Events.EPOCH_COMPLETED, log_training_results, train_loader, \
                                   evaluator, writer, size)
         trainer.add_event_handler(Events.EPOCH_COMPLETED, log_and_checkpoint_validation_results, val_loader, \
                                   evaluator, writer, size, config['checkpoint_every'], \
                                   "/auto/homes/bat34/VQA_PartII/baseline/trained_models/", \
                                   "depth_{}_{}".format(size, option_dir_name), model)
+        trainer.add_event_handler(Events.ITERATION_COMPLETED, log_iteration_results, train_loader, writer, size)
         trainer.run(train_loader, max_epochs=config['epochs'])
         
 

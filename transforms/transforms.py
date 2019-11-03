@@ -40,4 +40,4 @@ class PrepareBaselineBatch:
     def __init__(self):
         pass
     def __call__(self, batch):
-        return (batch['concat_vector'], batch['answer_id'])
+        return (batch['concat_vector'], torch.squeeze(batch['answer_id']))

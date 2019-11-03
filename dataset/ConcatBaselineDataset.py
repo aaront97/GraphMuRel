@@ -46,7 +46,7 @@ class ConcatBaselineDataset(AbstractVQADataset):
         #Size 4448
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]
-            item['answer_id'] = torch.LongTensor(annotation['answer_id'])
+            item['answer_id'] = torch.LongTensor([annotation['answer_id']])
             item['answer'] = annotation['most_frequent_answer']
             item['question_type'] = annotation['question_type']
         concat_vector = torch.cat((image_vector, question_vector), 0)

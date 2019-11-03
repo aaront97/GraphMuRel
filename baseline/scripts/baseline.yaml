@@ -1,11 +1,12 @@
 baseline_options:
-    dropout: 0.25
+    dropout: 0.5
     txt_enc: "BayesianUniSkip"
     batch_size: 16
-    lr: 0.01
-    weight_decay: 0.01
-    max_depth: 10
-    epochs: 100
-    checkpoint_every: 10
+    lr: 0.0001
+    weight_decay: 0.001
+    max_depth: 3
+    min_depth: 3
+    epochs: 5
+    checkpoint_every: 1
     
     

@@ -14,8 +14,9 @@ class ConcatBaselineNet(nn.Module):
         self.hidden = nn.ModuleList()
         self.dropout = dropout
         if not hidden_list or len(hidden_list) <= 2:
-            print("Initialising MLP with one hidden layer with no dropout")
+            print("Initialising MLP with one hidden layer")
             self.hidden.append(nn.Linear(input_dim, out_dim))
+            self.hidden.append(nn.Dropout(p=self.dropout))
         else:
             assert hidden_list[0] == input_dim and hidden_list[-1] == out_dim, \
              "Please make the first and last element equal to input_dim and out_dim respectively"
