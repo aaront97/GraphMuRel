@@ -1,5 +1,9 @@
 baseline_options:
     dropout: 0.25
     txt_enc: "BayesianUniSkip"
+    batch_size: 16
+    lr: 0.01
+    weight_decay: 0.01
+    momentum: 0.5
     
     
