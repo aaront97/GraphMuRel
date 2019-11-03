@@ -11,6 +11,7 @@ from baseline.models.ConcatBaselineNet import ConcatBaselineNet
 from tensorboardX import SummaryWriter
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
+import transforms.transforms as trfm
 import subprocess
 
 def get_hidden_layer_list(input_dim, out_dim, size):
@@ -94,12 +95,17 @@ def run():
     
     train_dataset = ConcatBaselineDataset(split="train", txt_enc=config['txt_enc'])
     val_dataset = ConcatBaselineDataset(split="val", txt_enc=config['txt_enc'])
+    collate_fn = trfm.Compose([\
+                              trfm.ConvertBatchListToDict(), \
+                              trfm.CreateBatchItem(), \
+                              trfm.PrepareBaselineBatch() \
+            ])
     train_loader = DataLoader(train_dataset, shuffle=True, \
                               batch_size=config['batch_size'], \
-                              collate_fn=train_dataset.collate_fn)
+                              collate_fn=collate_fn)
     val_loader = DataLoader(val_dataset, shuffle=True, \
                             batch_size=config['batch_size'], \
-                            collate_fn=val_dataset.collate_fn)
+                            collate_fn=collate_fn)
     input_dim = list(train_dataset[0]['concat_vector'].size())[0]
     out_dim = len(train_dataset.ans_to_aid)
     
@@ -121,7 +127,7 @@ def run():
                                   evaluator, writer, size)
         trainer.add_event_handler(Events.EPOCH_COMPLETED, log_and_checkpoint_validation_results, val_loader, \
                                   evaluator, writer, size, config['checkpoint_every'], \
-                                  "/auto/homes/bat34/VQA_PartII/baseline/pretrained_models/", \
+                                  "/auto/homes/bat34/VQA_PartII/baseline/trained_models/", \
                                   "depth_{}_{}".format(size, option_dir_name), model)
         trainer.run(train_loader, max_epochs=config['epochs'])
         

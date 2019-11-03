@@ -35,3 +35,9 @@ class CreateBatchItem:
             else:
                 out[key] = value
         return out
+
+class PrepareBaselineBatch:
+    def __init__(self):
+        pass
+    def __call__(self, batch):
+        return (batch['concat_vector'], batch['answer_id'])
