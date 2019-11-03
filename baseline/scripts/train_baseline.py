@@ -120,7 +120,7 @@ def run():
                                                      'nll': Loss(F.cross_entropy)},
                                             device=device)
         trainer.add_event_handler(Events.EPOCH_COMPLETED, log_training_results, train_loader, \
-                                  writer, size)
+                                  evaluator, writer, size)
         trainer.add_event_handler(Events.EPOCH_COMPLETED, log_and_checkpoint_validation_results, val_loader, \
                                   evaluator, writer, size, config['checkpoint_every'], \
                                   "/auto/homes/bat34/VQA_PartII/baseline/pretrained_models/", \
