@@ -35,9 +35,9 @@ class ConcatBaselineDataset(AbstractVQADataset):
         item['index'] = idx
         item['question_id'] = question['question_id']
         item['image_name'] = question['image_name']
-        question_ids = torch.LongTensor(question['question_ids'])
+        question_ids = torch.LongTensor([question['question_ids']])
         image_name = question['image_name']
-        question_vector = self.text_enc([question_ids], [len(question_ids)])
+        question_vector = self.text_enc(question_ids, [len(question_ids)])
         #Squeeze question_vector as it is in batch
         #Size 2400
         question_vector = torch.squeeze(question_vector)

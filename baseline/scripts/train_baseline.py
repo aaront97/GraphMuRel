@@ -128,10 +128,6 @@ def run():
                                   "depth_{}_{}".format(size, option_dir_name), model)
         trainer.run(train_loader, max_epochs=config['epochs'])
         
-        
-        
-        
-    
-    
+
 if __name__ == "__main__":
     run()
