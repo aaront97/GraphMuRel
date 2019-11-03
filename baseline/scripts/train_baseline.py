@@ -113,7 +113,6 @@ def run():
                                       hidden_list, \
                                       dropout=config['dropout'])
         optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'],\
-                                     momentum=config['momentum'], \
                                      weight_decay=config['weight_decay'])
         trainer = create_supervised_trainer(model, optimizer, F.cross_entropy, device=device)
         evaluator = create_supervised_evaluator(model,

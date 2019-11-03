@@ -4,7 +4,6 @@ baseline_options:
     batch_size: 16
     lr: 0.01
     weight_decay: 0.01
-    momentum: 0.5
     max_depth: 10
     epochs: 100
     checkpoint_every: 10
