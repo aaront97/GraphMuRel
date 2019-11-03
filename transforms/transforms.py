@@ -30,7 +30,7 @@ class CreateBatchItem:
     def _createBatchItem(self, batch):
         out = {}
         for key, value in batch.items():
-            if torch.istensor(value[0]):
+            if torch.is_tensor(value[0]):
                 out[key] = torch.stack(value, dim=0)
             else:
                 out[key] = value

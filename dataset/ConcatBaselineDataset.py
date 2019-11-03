@@ -5,15 +5,15 @@ from dataset.TextEncFactory import get_text_enc
 import transforms.transforms as transforms
 class ConcatBaselineDataset(AbstractVQADataset):
     def __init__(self, \
-              preprocessed_images_dir='auto/homes/bat34/VQA/BaselineTraining', \
+              preprocessed_images_dir='/auto/homes/bat34/VQA/BaselineTraining', \
               split='train', \
               ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
               txt_enc='BayesianUniSkip'):
         #TODO: include skipthoughts dropout?
         super(ConcatBaselineDataset, self).__init__()
         self.collate_fn = transforms.Compose([ \
-                transforms.ConvertBatchListToDict, \
-                transforms.CreateBatchItem \
+                transforms.ConvertBatchListToDict(), \
+                transforms.CreateBatchItem() \
                 ])
         self.image_features = torch.load( \
                os.path.join(preprocessed_images_dir, split, \
@@ -21,7 +21,7 @@ class ConcatBaselineDataset(AbstractVQADataset):
         
         self.split = split
         skipthoughts_dir = os.path.join(ROOT_DIR, 'data', 'skipthoughts')
-        self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, self.wid_to_word)
+        self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
         if split == 'train':
             self.dataset = self.train_set
         if split == 'val':
