@@ -8,12 +8,12 @@ import subprocess
 
 class AbstractVQADataset(Dataset):
 	def __init__(self, \
-		processed_dir='data/processed_splits', \
+		processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits', \
 		model='baseline',\
-		root_dir='/media/bat34/Elements/VQA',\
+		root_dir='/auto/homes/bat34/VQA',\
 		no_answers=3000,\
 		sample_answers=False,\
-		skipthoughts_dir='data/skipthoughts'):
+		skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'):
 
 		#Todo: Rationalise sampling answers?
 		self.no_answers = 3000
@@ -85,7 +85,7 @@ class AbstractVQADataset(Dataset):
 		known_words_list.append('UNK')
 		print('No. of known words: {}, No. of unknown words : {}, Percentage Loss of words: {}%' \
 			.format(len(known_words_list), len(unknown_words_list), (len(unknown_words_list) / (len(known_words_list) + len(unknown_words_list))) * 100))
-		return known_words_list, unknown_words_list
+		return list(set(known_words_list)), list(set(unknown_words_list))
 
 	def add_most_frequent_answer(self, split_set):
 		for annotation in split_set['annotations']:

@@ -1,4 +1,4 @@
-from .AbstractVQADataset import AbstractVQADataset
+from dataset.AbstractVQADataset import AbstractVQADataset
 import torch
 import os
 from dataset.TextEncFactory import get_text_enc
