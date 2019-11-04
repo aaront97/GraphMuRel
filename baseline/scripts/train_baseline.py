@@ -41,8 +41,8 @@ def create_summary_writer(model, loader, logdir):
         print(e)
     return writer
 
-def get_option_directory(config, chosen_keys, model_name='concatbaseline'):
-    res = model_name
+def get_option_directory(config, chosen_keys, size, model_name='concatbaseline'):
+    res = "depth_{}_".format(config['max_depth']) + model_name
     for key in chosen_keys:
         res += "_{}_{}".format(key, config[key])
     return res
