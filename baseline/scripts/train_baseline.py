@@ -79,11 +79,11 @@ def log_and_checkpoint_validation_results(engine, val_loader, evaluator, \
         print("Depth {}: Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
               .format(size, engine.state.epoch, avg_accuracy, avg_cross_entropy))
         if engine.state.epoch % checkpoint_every == 0:
-            out_name = model_name + "_epoch_{}.pth"
-            torch.save(model.state_dict, os.path.join(model_dir, out_name))
+            out_name = model_name + "_epoch_{}.pth".format(engine.state.epoch)
+            torch.save(model.state_dict(), os.path.join(model_dir, out_name))
         if avg_accuracy > max_accuracy:
             out_name = model_name + "BEST.pth"
-            torch.save(model.state_dict, os.path.join(model_dir, out_name))
+            torch.save(model.state_dict(), os.path.join(model_dir, out_name))
             max_accuracy = avg_accuracy
         writer.add_scalar("{}/validation/avg_loss".format(size), avg_cross_entropy, engine.state.epoch)
         writer.add_scalar("{}/validation/avg_accuracy".format(size), avg_accuracy, engine.state.epoch)
@@ -93,7 +93,7 @@ def run():
     with open('baseline.yaml') as f:
         config = yaml.load(f)
     config = config['baseline_options']
-    ROOT_DIR = 'auto/homes/bat34/VQA_PartII/baseline/'
+    ROOT_DIR = '/auto/homes/bat34/VQA_PartII/baseline/'
     option_dir_name = get_option_directory(config, ["dropout", "batch_size", "lr", "weight_decay"])
     logdir = os.path.join(ROOT_DIR, "logs", option_dir_name)
     writer = SummaryWriter(logdir=logdir)
