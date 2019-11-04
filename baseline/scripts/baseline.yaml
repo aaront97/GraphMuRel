@@ -4,8 +4,8 @@ baseline_options:
     batch_size: 16
     lr: 0.0001
     weight_decay: 0.001
-    max_depth: 5
-    min_depth: 5
+    max_depth: 10
+    min_depth: 10
     epochs: 5
     checkpoint_every: 1
     
