@@ -41,7 +41,7 @@ def create_summary_writer(model, loader, logdir):
         print(e)
     return writer
 
-def get_option_directory(config, chosen_keys, size, model_name='concatbaseline'):
+def get_option_directory(config, chosen_keys, model_name='concatbaseline'):
     res = "depth_{}_".format(config['max_depth']) + model_name
     for key in chosen_keys:
         res += "_{}_{}".format(key, config[key])
@@ -99,7 +99,8 @@ def run():
     writer = SummaryWriter(logdir=logdir)
     max_depth = config['max_depth']
     min_depth = config['min_depth']
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    #device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     print('CUDA AVAILABILITY: {}, Device used: {}'.format(torch.cuda.is_available(), device))
     
     train_dataset = ConcatBaselineDataset(split="train", txt_enc=config['txt_enc'])
@@ -112,7 +113,7 @@ def run():
     train_loader = DataLoader(train_dataset, shuffle=True, \
                               batch_size=config['batch_size'], \
                               collate_fn=collate_fn)
-    val_loader = DataLoader(val_dataset, shuffle=True, \
+    val_loader = DataLoader(val_dataset, shuffle=False, \
                             batch_size=config['batch_size'], \
                             collate_fn=collate_fn)
     input_dim = list(train_dataset[0]['concat_vector'].size())[0]
@@ -125,15 +126,16 @@ def run():
         model = ConcatBaselineNet(input_dim, out_dim, \
                                       hidden_list, \
                                       dropout=config['dropout'])
+        model.train()
         model = model.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'],\
                                      weight_decay=config['weight_decay'])
         
-        trainer = create_supervised_trainer(model, optimizer, F.cross_entropy, device=device)
+        trainer = create_supervised_trainer(model, optimizer, F.cross_entropy, device='cuda')
         evaluator = create_supervised_evaluator(model,\
                                             metrics={'accuracy': Accuracy(),
                                                      'cross_entropy': Loss(F.cross_entropy)},\
-                                            device=device)
+                                            device='cuda')
         pbar_train = ProgressBar()
         pbar_train.attach(trainer, ['loss'])
         trainer.add_event_handler(Events.EPOCH_COMPLETED, log_training_results, train_loader, \

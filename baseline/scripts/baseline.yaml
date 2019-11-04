@@ -1,7 +1,7 @@
 baseline_options:
     dropout: 0.5
     txt_enc: "BayesianUniSkip"
-    batch_size: 64
+    batch_size: 128
     lr: 0.0001
     weight_decay: 0
     max_depth: 1
