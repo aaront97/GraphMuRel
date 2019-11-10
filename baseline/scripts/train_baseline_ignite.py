@@ -42,7 +42,7 @@ def create_summary_writer(model, loader, logdir):
         print(e)
     return writer
 
-def get_option_directory(config, chosen_keys, model_name='concatbaseline'):
+def get_option_directory(config, chosen_keys, model_name='igniteconcatbaseline'):
     res = "depth_{}_".format(config['max_depth']) + model_name
     for key in chosen_keys:
         res += "_{}_{}".format(key, config[key])
@@ -113,10 +113,12 @@ def run():
             ])
     train_loader = DataLoader(train_dataset, shuffle=True, \
                               batch_size=config['batch_size'], \
-                              collate_fn=collate_fn)
+                              collate_fn=collate_fn,
+                             num_workers=config['num_workers'])
     val_loader = DataLoader(val_dataset, shuffle=False, \
                             batch_size=config['batch_size'], \
-                            collate_fn=collate_fn)
+                            collate_fn=collate_fn,
+                           num_workers=config['num_workers'])
     input_dim = list(train_dataset[0]['concat_vector'].size())[0]
     out_dim = len(train_dataset.ans_to_aid)
     
