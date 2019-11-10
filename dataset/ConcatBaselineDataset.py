@@ -8,13 +8,16 @@ class ConcatBaselineDataset(AbstractVQADataset):
               preprocessed_images_dir='/auto/homes/bat34/VQA/BaselineTraining', \
               split='train', \
               ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
-              txt_enc='BayesianUniSkip'):
+              txt_enc='BayesianUniSkip',\
+              is_test_dev=True, \
+              collate_fn=None):
         #TODO: include skipthoughts dropout?
         super(ConcatBaselineDataset, self).__init__()
+        self.is_test_dev = is_test_dev
         self.collate_fn = transforms.Compose([ \
                 transforms.ConvertBatchListToDict(), \
                 transforms.CreateBatchItem() \
-                ])
+                ]) if collate_fn is None else collate_fn
         self.image_features = torch.load( \
                os.path.join(preprocessed_images_dir, split, \
                 'baseline_{}_cnn_features.pth'.format(split)))
@@ -42,7 +45,10 @@ class ConcatBaselineDataset(AbstractVQADataset):
         #Size 2400
         question_vector = torch.squeeze(question_vector)
         #Size 2048
-        image_vector = self.image_features[image_name]
+        if self.split == 'test' and self.is_test_dev:
+            image_vector = self.image_features[image_name.replace('-dev', '')]
+        else:
+            image_vector = self.image_features[image_name]
         #Size 4448
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]

@@ -21,6 +21,8 @@ class ConvertBatchListToDict:
         else:
             return batch
 
+
+
 class CreateBatchItem:
     def __init__(self):
         pass
@@ -41,3 +43,12 @@ class PrepareBaselineBatch:
         pass
     def __call__(self, batch):
         return (batch['concat_vector'].detach(), torch.squeeze(batch['answer_id']).detach())
+    
+class PrepareBaselineTestBatch:
+    def __init__(self):
+        pass
+    def __call__(self, batch):
+        return self._createBatchTestItem(batch)
+    
+    def _createBatchTestItem(self, batch):
+        return (batch['concat_vector'].detach(), batch['question_id'])

@@ -24,7 +24,7 @@ class AbstractVQADataset(Dataset):
 			self.process()
 		self.train_set = torch.load(os.path.join(self.processed_dir, 'train2014_processed.pth'))
 		self.val_set = torch.load(os.path.join(self.processed_dir, 'val2014_processed.pth'))
-		self.test_set = torch.load(os.path.join(self.processed_dir, 'testdev2015_processed.pth'))
+		self.test_set = torch.load(os.path.join(self.processed_dir, 'test2015_processed.pth'))
 		self.wid_to_word = torch.load(os.path.join(self.processed_dir, 'wid_to_word.pth'))
 		self.word_to_wid = torch.load(os.path.join(self.processed_dir, 'word_to_wid.pth'))
 		self.ans_to_aid = torch.load(os.path.join(self.processed_dir, 'ans_to_aid.pth'))
@@ -153,7 +153,7 @@ class AbstractVQADataset(Dataset):
 		path_val_anno = os.path.join(self.root_dir, 'Annotations', 'v2_mscoco_val2014_annotations.json')
 		path_train_ques = os.path.join(self.root_dir, 'Questions', 'v2_OpenEnded_mscoco_train2014_questions.json')
 		path_val_ques = os.path.join(self.root_dir, 'Questions', 'v2_OpenEnded_mscoco_val2014_questions.json')
-		path_test_ques = os.path.join(self.root_dir, 'Questions', 'v2_OpenEnded_mscoco_test-dev2015_questions.json')
+		path_test_ques = os.path.join(self.root_dir, 'Questions', 'v2_OpenEnded_mscoco_test2015_questions.json')
 
 		with open(path_train_ques, 'r') as train_ques_handle, open(path_train_anno, 'r') as train_anno_handle:
 			train_set = self.merge_questions_with_annotations(json.load(train_ques_handle), \
@@ -206,7 +206,7 @@ class AbstractVQADataset(Dataset):
 
 		torch.save(train_set, os.path.join(self.processed_dir, 'train2014_processed.pth'))
 		torch.save(val_set, os.path.join(self.processed_dir, 'val2014_processed.pth'))
-		torch.save(test_set, os.path.join(self.processed_dir, 'testdev2015_processed.pth'))
+		torch.save(test_set, os.path.join(self.processed_dir, 'test2015_processed.pth'))
 		torch.save(wid_to_word, os.path.join(self.processed_dir, 'wid_to_word.pth'))
 		torch.save(word_to_wid, os.path.join(self.processed_dir, 'word_to_wid.pth'))
 		torch.save(ans_to_aid, os.path.join(self.processed_dir, 'ans_to_aid.pth'))
