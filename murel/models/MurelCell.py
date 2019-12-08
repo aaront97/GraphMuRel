@@ -21,30 +21,39 @@ class MurelCell(nn.Module):
                                          config['fused_fusion_type'], \
                                          config['dropout_fused'])
         
-    def pairwise(self, fused_features, bounding_boxes):
-        relations = []
-        processed = [None for _ in range(len(bounding_boxes))]
-        for i, b_i in enumerate(bounding_boxes):
-            edges_incoming_i = []
-            for j, b_i in enumerate(bounding_boxes):
-                if i != j:
-                    edges_incoming_i.append(self.fusion_box([bounding_boxes[i], bounding_boxes[j]]) + \
-                                self.fusion_fused([fused_features[i], fused_features[j]]))
-            relations.append(edges_incoming_i)
-                    
-        for i in range(len(bounding_boxes)):
-            edges = torch.stack(relations[i])
-            e_i_hat, _ = torch.max(edges, dim=0)
-            processed[i] = fused_features[i] + e_i_hat
-        return processed
-                            
-        
-    def forward(self, question_embedding, object_features_list, bounding_boxes):
-        #Expect x to be a list of question_vec, and object_vec
-        fused_features = []
-        for obj_feature in object_features_list:
-            fused_features.append(self.fusion_features([obj_feature, question_embedding]))
-        additions = self.pairwise(fused_features, bounding_boxes)
-        for i in range(len(object_features_list)):
-            object_features_list[i] = torch.sum(object_features_list[i], additions[i])
-        return object_features_list
+    def pairwise(self, fused_features, bounding_boxes, batch_size, num_obj):
+        relations = self.fusion_fused(
+                        [ \
+                                fused_features.unsqueeze(2).expand(-1, -1, num_obj, -1) \
+                                .contiguous().view(batch_size * num_obj * num_obj, -1),\
+                                fused_features.unsqueeze(1).contiguous().expand(-1, num_obj, -1, -1) \
+                                .contiguous().view(batch_size * num_obj * num_obj, -1) \
+                        ] \
+                        ) + \
+                    self.fusion_box(
+                        [ \
+                                bounding_boxes.unsqueeze(2).expand(-1, -1, num_obj, -1) \
+                                .contiguous().view(batch_size * num_obj * num_obj, -1),\
+                                bounding_boxes.unsqueeze(1).contiguous().expand(-1, num_obj, -1, -1) \
+                                .contiguous().view(batch_size * num_obj * num_obj, -1) \
+                        ] \
+                        ) 
+        relations = relations.view(batch_size, num_obj, num_obj, -1)
+        e_hat, _ = torch.max(relations, dim=2)
+        res = fused_features + e_hat
+        return res
+    
+    def fuse_object_features_with_questions(self, object_features_list, question_embedding, batch_size, num_obj):
+        res =  self.fusion_features([ \
+                    object_features_list.contiguous().view(batch_size * num_obj, -1), \
+                    question_embedding
+                ])
+        res = res.view(batch_size, num_obj, -1)
+        return res
+    
+    def forward(self, question_embedding, object_features_list, bounding_boxes, batch_size, num_obj):
+        fused_question_object = self.fuse_object_features_with_questions(object_features_list, question_embedding, \
+                                                          batch_size, num_obj)
+        pairwise_res = self.pairwise(fused_question_object, bounding_boxes, batch_size, num_obj)
+        res = object_features_list + pairwise_res
+        return res

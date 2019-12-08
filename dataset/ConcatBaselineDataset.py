@@ -10,9 +10,22 @@ class ConcatBaselineDataset(AbstractVQADataset):
               ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
               txt_enc='BayesianUniSkip',\
               is_test_dev=True, \
-              collate_fn=None):
+              collate_fn=None, \
+              processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits', \
+        	  model='murel',\
+        	  vqa_dir='/auto/homes/bat34/VQA',\
+        	  no_answers=3000,\
+        	  sample_answers=False,\
+        	  skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'):
         #TODO: include skipthoughts dropout?
-        super(ConcatBaselineDataset, self).__init__()
+        super(ConcatBaselineDataset, self).__init__(
+                processed_dir=processed_dir, 
+                model="baseline", 
+                vqa_dir=vqa_dir,
+                no_answers=no_answers,
+                sample_answers=sample_answers,
+                skipthoughts_dir=skipthoughts_dir)
+        
         self.is_test_dev = is_test_dev
         self.collate_fn = transforms.Compose([ \
                 transforms.ConvertBatchListToDict(), \
@@ -25,12 +38,6 @@ class ConcatBaselineDataset(AbstractVQADataset):
         self.split = split
         skipthoughts_dir = os.path.join(ROOT_DIR, 'data', 'skipthoughts')
         self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
-        if split == 'train':
-            self.dataset = self.train_set
-        if split == 'val':
-            self.dataset = self.val_set
-        if split == 'test':
-            self.dataset = self.test_set
 
     def __getitem__(self, idx):
         item = {}

@@ -4,32 +4,43 @@ import torch
 import os
 from dataset.TextEncFactory import get_text_enc
 import transforms.transforms as transforms
-class MuralNetDataset(AbstractVQADataset):
+from skipthoughts import BayesianUniSkip
+import resource
+
+class MurelNetDataset(AbstractVQADataset):
     def __init__(self, \
-              bottom_up_features_dir, \
+              bottom_up_features_dir='', \
               object_features_dir='/local/scratch/bat34/', \
               split='train', \
               ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
               txt_enc='BayesianUniSkip',\
-              collate_fn=None):
+              collate_fn=None, \
+              processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits', \
+        	  model='murel',\
+        	  vqa_dir='/auto/homes/bat34/VQA',\
+        	  no_answers=3000,\
+        	  sample_answers=False,\
+        	  skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'\
+        ):
+        super(MurelNetDataset, self).__init__(\
+                 processed_dir=processed_dir, \
+                 model="murel", \
+                 vqa_dir=vqa_dir, \
+                 no_answers=no_answers, \
+                 sample_answers=sample_answers, \
+                 skipthoughts_dir=skipthoughts_dir)
         #Change this#########
         self.collate_fn = transforms.Compose([ \
                 transforms.ConvertBatchListToDict(), \
-                transforms.CreateBatchItem() \
                 ]) if collate_fn is None else collate_fn
         ############
         self.bottom_up_features_dir = bottom_up_features_dir
         self.object_features_dir = object_features_dir
         self.split = split
-        skipthoughts_dir = os.path.join(ROOT_DIR, 'data', 'skipthoughts')
-        self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in \
-                                                                 self.wid_to_word.items()])
-        if split == 'train':
-            self.dataset = self.train_set
-        if split == 'val':
-            self.dataset = self.val_set
-        if split == 'test':
-            self.dataset = self.test_set
+        self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
+        
+    def __len__(self):
+        return len(self.dataset['questions'])
     
     def __getitem__(self, idx):
         item = {}
@@ -41,7 +52,7 @@ class MuralNetDataset(AbstractVQADataset):
         image_name = question['image_name']
         question_vector = self.text_enc(question_ids, [len(question_ids)])
         question_vector = torch.squeeze(question_vector)
-        dict_features = torch.load(image_name + '.pth')
+        dict_features = torch.load(os.path.join(self.bottom_up_features_dir, image_name ) + '.pth')
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
         item['question_embedding'] = question_vector
