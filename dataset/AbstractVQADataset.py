@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 
+
 class AbstractVQADataset(Dataset):
 	def __init__(self, \
 		processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits', \

@@ -1,37 +1,36 @@
+# -*- coding: utf-8 -*-
 from dataset.AbstractVQADataset import AbstractVQADataset
 import torch
 import os
 from dataset.TextEncFactory import get_text_enc
 import transforms.transforms as transforms
-class ConcatBaselineDataset(AbstractVQADataset):
+class MuralNetDataset(AbstractVQADataset):
     def __init__(self, \
-              preprocessed_images_dir='/auto/homes/bat34/VQA/BaselineTraining', \
+              bottom_up_features_dir, \
+              object_features_dir='/local/scratch/bat34/', \
               split='train', \
               ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
               txt_enc='BayesianUniSkip',\
-              is_test_dev=True, \
               collate_fn=None):
-        #TODO: include skipthoughts dropout?
-        super(ConcatBaselineDataset, self).__init__()
-        self.is_test_dev = is_test_dev
+        #Change this#########
         self.collate_fn = transforms.Compose([ \
                 transforms.ConvertBatchListToDict(), \
                 transforms.CreateBatchItem() \
                 ]) if collate_fn is None else collate_fn
-        self.image_features = torch.load( \
-               os.path.join(preprocessed_images_dir, split, \
-                'baseline_{}_cnn_features.pth'.format(split)))
-        
+        ############
+        self.bottom_up_features_dir = bottom_up_features_dir
+        self.object_features_dir = object_features_dir
         self.split = split
         skipthoughts_dir = os.path.join(ROOT_DIR, 'data', 'skipthoughts')
-        self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
+        self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in \
+                                                                 self.wid_to_word.items()])
         if split == 'train':
             self.dataset = self.train_set
         if split == 'val':
             self.dataset = self.val_set
         if split == 'test':
             self.dataset = self.test_set
-
+    
     def __getitem__(self, idx):
         item = {}
         question = self.dataset['questions'][idx]
@@ -41,21 +40,14 @@ class ConcatBaselineDataset(AbstractVQADataset):
         question_ids = torch.LongTensor([question['question_ids']])
         image_name = question['image_name']
         question_vector = self.text_enc(question_ids, [len(question_ids)])
-        #Squeeze question_vector as it is in batch
-        #Size 2400
-        question_vector = torch.squeeze(question_vector).detach()
-        #Size 2048
-        image_vector = self.image_features[image_name].detach()
-        #Size 4448
+        question_vector = torch.squeeze(question_vector)
+        dict_features = torch.load(image_name + '.pth')
+        item['bounding_boxes'] = dict_features['norm_rois']
+        item['object_features_list'] = dict_features['pooled_feat']
+        item['question_embedding'] = question_vector
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])
             item['answer'] = annotation['most_frequent_answer']
             item['question_type'] = annotation['question_type']
-        concat_vector = torch.cat((image_vector, question_vector), 0)
-        item['concat_vector'] = concat_vector
         return item
-        
-    def __len__(self):
-        return len(self.dataset['questions'])
-

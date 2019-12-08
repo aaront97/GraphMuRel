@@ -187,9 +187,6 @@ def run():
             pbar.set_description("Epoch[{}] Iteration[{}/{}]".format(epoch, local_iteration, len(train_loader)))
             
             inputs, labels = data[0].cuda(), data[1].cuda()
-            #print('Model is at CUDA? {}'.format(next(model.parameters()).is_cuda))
-            #print('Input is at: {}, Labels is at: {}'.format(inputs.device, labels.device))
-            #print(inputs.size(), labels.size())
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)

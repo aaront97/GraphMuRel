@@ -16,12 +16,9 @@ class ConvertBatchListToDict:
     
     def convertBLtoD(self, batch):
         if isinstance(batch[0], collections.Mapping):
-            return {key: self.convertBLtoD([d[key] for d in batch]) for \
-                    key in batch[0]}
+            return {key: [d[key] for d in batch] for key in batch[0]}
         else:
             return batch
-
-
 
 class CreateBatchItem:
     def __init__(self):
@@ -43,7 +40,7 @@ class PrepareBaselineBatch:
         pass
     def __call__(self, batch):
         return (batch['concat_vector'].detach(), torch.squeeze(batch['answer_id']).detach())
-    
+
 class PrepareBaselineTestBatch:
     def __init__(self):
         pass

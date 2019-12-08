@@ -1,0 +1,31 @@
+murel_options:
+    dropout: 0.25
+    txt_enc: "BayesianUniSkip"
+    batch_size: 1024
+    lr: 0.0001
+    weight_decay: 0
+    max_depth: 3
+    min_depth: 3
+    epochs: 15
+    checkpoint_every: 5
+    num_workers: 16
+    load_last_epoch: Yes
+    unroll_steps: 3
+    bottom_up_features_dir: '/media/bat34/Elements/play_murel/2018-04-27_bottom-up-attention_fixed_36'
+    fusion:
+        features_fusion_type: mutan
+        features_input_fusion_dims: [2048, 2400]
+        features_output_fusion_dims: 2048
+        dropout_features: 0.
+        box_fusion_type: mutan
+        box_input_fusion_dims: [4, 4]
+        box_output_fusion_dims: 2048
+        dropout_box: 0.
+        fused_fusion_type: mutan
+        fused_input_fusion_dims: [2048, 2048]
+        fused_output_fusion_dims: 2048
+        dropout_fused: 0.
+        final_input_fusion_dims: [2048, 2400]
+        final_output_fusion_dims: 3000
+        final_fusion_type: mutan
+        dropout_final: 0.
