@@ -17,10 +17,10 @@ murel_options:
     unroll_steps: 3
     bottom_up_features_dir: '/media/bat34/Elements/play_murel/2018-04-27_bottom-up-attention_fixed_36'
     log_every: 50
-    fusion_type: mutan
+    fusion_type: block
     fusion:
         obj_features_question:
-            type: mutan
+            type: block
             input_dims: [2048, 2400]
             output_dims: 2048
             dropout_prelin: 0.
@@ -29,7 +29,7 @@ murel_options:
             rank: 15
             mm_dim: 1000
         box:
-            type: mutan
+            type: block
             input_dims: [4, 4]
             output_dims: 2048
             dropout_prelin: 0.
@@ -38,7 +38,7 @@ murel_options:
             rank: 5
             mm_dim: 200
         obj_features_obj_features:
-            type: mutan
+            type: block
             input_dims: [2048, 2048]
             output_dims: 2048
             dropout_prelin: 0.
@@ -47,7 +47,7 @@ murel_options:
             rank: 5
             mm_dim: 200
         final_fusion:
-            type: mutan
+            type: block
             input_dims: [2048, 2400]
             output_dims: 3000
             dropout_prelin: 0.1

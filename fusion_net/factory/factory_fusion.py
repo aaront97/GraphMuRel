@@ -36,7 +36,7 @@ def factory_fusion(config):
     
     if fusion_type == 'mutan':
         return block.fusions.Mutan(input_dims, output_dims, dropout_input=dropout_input, \
-                                   dropout_pre_lin=dropout_pre_lin, chunks=chunks, rank=rank, mm_dim=mm_dim)
+                                   dropout_pre_lin=dropout_pre_lin, rank=rank, mm_dim=mm_dim)
     
     if fusion_type == 'block_tucker':
         return block.fusions.BlockTucker(input_dims, output_dims, dropout_input=dropout_input, \
