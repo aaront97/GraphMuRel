@@ -168,8 +168,7 @@ def run():
     model = MurelNet(config)
     start_epoch, model = load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=config['load_last_epoch'])
     print('Starting from EPOCH {}'.format(start_epoch))
-    optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'],\
-                                     weight_decay=config['weight_decay'])
+    optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'])
     lr_scheduler = LR_Scheduler(config)
     criterion = nn.NLLLoss()
     
