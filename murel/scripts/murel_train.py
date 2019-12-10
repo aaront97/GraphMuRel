@@ -8,6 +8,7 @@ from murel.models.MurelNet import MurelNet
 from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
+from collections import OrderedDict
 
 def create_summary_writer(model, loader, logdir):
     batch = next(iter(loader))
@@ -25,7 +26,7 @@ def get_option_directory(config, chosen_keys, model_name='murel'):
         res += "_{}_{}".format(key, config[key])
     return res
 
-def val_evaluate(model, epoch, val_loader, writer, criterion, size):
+def val_evaluate(model, epoch, val_loader, writer, criterion):
     model.eval()
     correct = 0
     total = 0
@@ -34,7 +35,12 @@ def val_evaluate(model, epoch, val_loader, writer, criterion, size):
     evaluator_criterion = nn.NLLLoss(reduction='sum')
     with torch.no_grad():
         for data in val_loader:
-            item = data.cuda()
+            item = {\
+                    'question_embedding': data['question_embedding'].cuda(), \
+                    'object_features_list': data['object_features_list'].cuda(), \
+                    'bounding_boxes': data['bounding_boxes'].cuda(), \
+                    'answer_id': torch.squeeze(data['answer_id']).cuda()
+            }
             inputs, labels = item, item['answer_id']
             outputs = model(inputs)
             _, predicted = torch.max(outputs, dim=1)
@@ -44,13 +50,13 @@ def val_evaluate(model, epoch, val_loader, writer, criterion, size):
             count += 1
     avg_accuracy = correct / total
     avg_cross_entropy = running_loss / total
-    print("Depth {}: Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-              .format(size, epoch, avg_accuracy, avg_cross_entropy))
+    print("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+              .format(epoch, avg_accuracy, avg_cross_entropy))
     writer.add_scalar("validation/avg_loss", avg_cross_entropy, epoch)
     writer.add_scalar("validation/avg_accuracy", avg_accuracy, epoch)
     return avg_accuracy
 
-def train_evaluate(model, epoch, train_loader, writer, criterion, size):
+def train_evaluate(model, epoch, train_loader, writer, criterion):
     model.eval()
     correct = 0
     total = 0
@@ -61,7 +67,13 @@ def train_evaluate(model, epoch, train_loader, writer, criterion, size):
         for data in train_loader:
 #             if count % (len(train_loader) // 5) == 0:
 #                 break
-            inputs, labels = data[0].cuda(), data[1].cuda()
+            item = {\
+                    'question_embedding': data['question_embedding'].cuda(), \
+                    'object_features_list': data['object_features_list'].cuda(), \
+                    'bounding_boxes': data['bounding_boxes'].cuda(), \
+                    'answer_id': torch.squeeze(data['answer_id']).cuda()
+            }
+            inputs, labels = item, item['answer_id']
             outputs = model(inputs)
             _, predicted = torch.max(outputs, dim=1)
             total += labels.size(0)
@@ -70,8 +82,8 @@ def train_evaluate(model, epoch, train_loader, writer, criterion, size):
             count += 1
     avg_accuracy = correct / total
     avg_cross_entropy = running_loss / total
-    print("Depth {}: Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-              .format(size, epoch, avg_accuracy, avg_cross_entropy))
+    print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+              .format(epoch, avg_accuracy, avg_cross_entropy))
     writer.add_scalar("training/avg_loss", avg_cross_entropy, epoch)
     writer.add_scalar("training/avg_accuracy", avg_accuracy, epoch)
     return avg_accuracy
@@ -85,10 +97,17 @@ def checkpoint(model, epoch, isBest, config, model_dir, writer_dir_name, accurac
         model_name = writer_dir_name + "_epoch_{}.pth".format(epoch)
         torch.save(model.state_dict(), os.path.join(model_dir, model_name))
     if isBest:
+        model_name = writer_dir_name + "_epoch_{}".format(epoch)
         model_name = writer_dir_name + "_BEST.pth"
         torch.save(model.state_dict(), os.path.join(model_dir, model_name))
-    
-def load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=True):
+
+def generate_state_dict_compatible_with_data_parallel(old_state_dict):
+    new_state_dict = OrderedDict()
+    for key, value in old_state_dict.items()
+        new_state_dict[new_state_dict.lstrip('module.')] = value
+    return new_state_dict
+        
+def load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=True, dataParallel=True):
     best_name = os.path.join(model_dir, writer_dir_name) + "_BEST.pth"
     epoch_list = [f for f in os.listdir(model_dir) if 'epoch' in f and f.startswith(writer_dir_name)]
     epoch_list = sorted(epoch_list)
@@ -96,13 +115,25 @@ def load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_ep
     if epoch_list and load_last_epoch:
         last_epoch_name = epoch_list[-1]
         epoch_no = int(last_epoch_name.split("epoch_")[1].strip('.pth'))
-        model.load_state_dict(torch.load(os.path.join(model_dir, last_epoch_name)))
+        model_dict = torch.load(os.path.join(model_dir, last_epoch_name))
+        if dataParallel:
+            model.load_state_dict(model_dict)
+        else:
+            model_dict = generate_state_dict_compatible_with_data_parallel(model_dict)
+            model.load_state_dict(model_dict)
         return epoch_no, model
     if os.path.exists(best_name) and not load_last_epoch:
+        model_dict = torch.load(os.path.join(model_dir, last_epoch_name))
         model.load_state_dict(torch.load(best_name))
+        if dataParallel:
+            model.load_state_dict(model_dict)
+        else:
+            model_dict = generate_state_dict_compatible_with_data_parallel(model_dict)
+            model.load_state_dict(model_dict)
         return epoch_no, model
     else:
         return 0, model
+
 
 class LR_Scheduler:
     def __init__(self, config):
@@ -112,7 +143,7 @@ class LR_Scheduler:
         base_lr = config['lr']
         gradual_warmup_steps = torch.linspace(gradual_warmup_steps[0], \
                                               gradual_warmup_steps[1], \
-                                              gradual_warmup_steps[2])
+                                              int(gradual_warmup_steps[2]))
         self.gradual_warmup_steps = [base_lr * weight for weight in gradual_warmup_steps]
         self.lr_decay_epochs = list(range(lr_decay_epochs[0], \
                                           lr_decay_epochs[1], \
@@ -166,15 +197,19 @@ def run():
                             batch_size=config['batch_size'], \
                             num_workers=config['num_workers'])
     model = MurelNet(config)
-    start_epoch, model = load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=config['load_last_epoch'])
+    model.cuda()
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
+        start_epoch, model = load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=config['load_last_epoch'], dataParallel=True)
+    else:
+        start_epoch, model = load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=config['load_last_epoch'], dataParallel=False)
+    
     print('Starting from EPOCH {}'.format(start_epoch))
     optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'])
     lr_scheduler = LR_Scheduler(config)
     criterion = nn.NLLLoss()
     
-    model.cuda()
-    if torch.cuda.device_count() > 1:
-        model = nn.DataParallel(model)
+
     
     max_accuracy = -1
     global_iteration = 0
@@ -190,7 +225,12 @@ def run():
             
             pbar.set_description("Epoch[{}] Iteration[{}/{}]".format(epoch, \
                                  local_iteration, len(train_loader)))
-            item = data.cuda()
+            item = {\
+                    'question_embedding': data['question_embedding'].cuda(), \
+                    'object_features_list': data['object_features_list'].cuda(), \
+                    'bounding_boxes': data['bounding_boxes'].cuda(), \
+                    'answer_id': torch.squeeze(data['answer_id']).cuda()
+            }
             inputs, labels = item, item['answer_id']
             optimizer.zero_grad()
             outputs = model(inputs)

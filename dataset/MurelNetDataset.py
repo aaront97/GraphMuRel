@@ -49,7 +49,7 @@ class MurelNetDataset(AbstractVQADataset):
         question_ids = torch.LongTensor([question['question_ids']])
         image_name = question['image_name']
         question_vector = self.text_enc(question_ids, [len(question_ids)])
-        question_vector = torch.squeeze(question_vector)
+        question_vector = torch.squeeze(question_vector).detach()
         dict_features = torch.load(os.path.join(self.bottom_up_features_dir, image_name ) + '.pth')
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']

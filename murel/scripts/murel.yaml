@@ -13,9 +13,8 @@ murel_options:
     epochs: 25
     checkpoint_every: 5
     num_workers: 4
-    load_last_epoch: False
+    load_last_epoch: True
     unroll_steps: 3
-    bottom_up_features_dir: '/media/bat34/Elements/play_murel/2018-04-27_bottom-up-attention_fixed_36'
     log_every: 50
     fusion_type: block
     fusion:

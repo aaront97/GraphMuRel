@@ -3,3 +3,5 @@ torch_tensorboard_tutorial
 __pycache__
 baseline/trained_models/
 baseline/logs/
+murel/logs
+murel/trained_models
