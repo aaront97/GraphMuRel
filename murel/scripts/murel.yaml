@@ -24,7 +24,7 @@ murel_options:
             input_dims: [2048, 2400]
             output_dims: 2048
             dropout_prelin: 0.
-            drouput_input: 0.1
+            dropout_input: 0.1
             chunks: 20
             rank: 15
             mm_dim: 1000
@@ -33,7 +33,7 @@ murel_options:
             input_dims: [4, 4]
             output_dims: 2048
             dropout_prelin: 0.
-            drouput_input: 0.
+            dropout_input: 0.
             chunks: 5
             rank: 5
             mm_dim: 200
@@ -42,7 +42,7 @@ murel_options:
             input_dims: [2048, 2048]
             output_dims: 2048
             dropout_prelin: 0.
-            drouput_input: 0.
+            dropout_input: 0.
             chunks: 5
             rank: 5
             mm_dim: 200
@@ -51,7 +51,7 @@ murel_options:
             input_dims: [2048, 2400]
             output_dims: 3000
             dropout_prelin: 0.1
-            drouput_input: 0.
+            dropout_input: 0.
             chunks: 20
             rank: 10
             mm_dim: 1600
