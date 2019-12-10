@@ -10,7 +10,6 @@ import resource
 class MurelNetDataset(AbstractVQADataset):
     def __init__(self, \
               bottom_up_features_dir='', \
-              object_features_dir='/local/scratch/bat34/', \
               split='train', \
               ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
               txt_enc='BayesianUniSkip',\
@@ -35,7 +34,6 @@ class MurelNetDataset(AbstractVQADataset):
                 ]) if collate_fn is None else collate_fn
         ############
         self.bottom_up_features_dir = bottom_up_features_dir
-        self.object_features_dir = object_features_dir
         self.split = split
         self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
         

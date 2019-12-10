@@ -34,6 +34,7 @@ class AbstractVQADataset(Dataset):
         self.word_to_wid = torch.load(os.path.join(self.processed_dir, 'word_to_wid.pth'))
         self.ans_to_aid = torch.load(os.path.join(self.processed_dir, 'ans_to_aid.pth'))
         self.aid_to_ans = torch.load(os.path.join(self.processed_dir, 'aid_to_ans.pth'))
+    
 
     def tokenize(self, s):
         #we don't replace # because # is used to refer to number of items

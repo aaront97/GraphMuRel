@@ -1,31 +1,57 @@
 murel_options:
-    dropout: 0.25
+    ROOT_DIR: '/auto/homes/bat34/VQA_PartII/murel'
+    bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
+    skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
+    processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
+    vqa_dir: '/auto/homes/bat34/VQA'
     txt_enc: "BayesianUniSkip"
-    batch_size: 1024
-    lr: 0.0001
-    weight_decay: 0
-    max_depth: 3
-    min_depth: 3
-    epochs: 15
+    batch_size: 84
+    lr: 0.0003
+    gradual_warmup_steps: [0.5, 2.0, 7.0] #torch.linspace
+    lr_decay_epochs: [14, 24, 2] #range
+    lr_decay_rate: .25
+    epochs: 25
     checkpoint_every: 5
-    num_workers: 16
-    load_last_epoch: Yes
+    num_workers: 4
+    load_last_epoch: False
     unroll_steps: 3
     bottom_up_features_dir: '/media/bat34/Elements/play_murel/2018-04-27_bottom-up-attention_fixed_36'
+    log_every: 50
+    fusion_type: mutan
     fusion:
-        features_fusion_type: mutan
-        features_input_fusion_dims: [2048, 2400]
-        features_output_fusion_dims: 2048
-        dropout_features: 0.
-        box_fusion_type: mutan
-        box_input_fusion_dims: [4, 4]
-        box_output_fusion_dims: 2048
-        dropout_box: 0.
-        fused_fusion_type: mutan
-        fused_input_fusion_dims: [2048, 2048]
-        fused_output_fusion_dims: 2048
-        dropout_fused: 0.
-        final_input_fusion_dims: [2048, 2400]
-        final_output_fusion_dims: 3000
-        final_fusion_type: mutan
-        dropout_final: 0.
+        obj_features_question:
+            type: mutan
+            input_dims: [2048, 2400]
+            output_dims: 2048
+            dropout_prelin: 0.
+            drouput_input: 0.1
+            chunks: 20
+            rank: 15
+            mm_dim: 1000
+        box:
+            type: mutan
+            input_dims: [4, 4]
+            output_dims: 2048
+            dropout_prelin: 0.
+            drouput_input: 0.
+            chunks: 5
+            rank: 5
+            mm_dim: 200
+        obj_features_obj_features:
+            type: mutan
+            input_dims: [2048, 2048]
+            output_dims: 2048
+            dropout_prelin: 0.
+            drouput_input: 0.
+            chunks: 5
+            rank: 5
+            mm_dim: 200
+        final_fusion:
+            type: mutan
+            input_dims: [2048, 2400]
+            output_dims: 3000
+            dropout_prelin: 0.1
+            drouput_input: 0.
+            chunks: 20
+            rank: 10
+            mm_dim: 1600

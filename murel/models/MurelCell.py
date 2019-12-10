@@ -8,18 +8,13 @@ from fusion_net.factory.factory_fusion import factory_fusion, fusion_types
 class MurelCell(nn.Module):
     def __init__(self, config):
         super(MurelCell, self).__init__()
-        self.fusion_features = factory_fusion(config['features_input_fusion_dims'], \
-                                     config['features_output_fusion_dims'], \
-                                     config['features_fusion_type'], \
-                                     config['dropout_features'])
-        self.fusion_box = factory_fusion(config['box_input_fusion_dims'], \
-                                         config['box_output_fusion_dims'], \
-                                         config['box_fusion_type'], \
-                                         config['dropout_box'])
-        self.fusion_fused = factory_fusion(config['fused_input_fusion_dims'], \
-                                         config['fused_output_fusion_dims'], \
-                                         config['fused_fusion_type'], \
-                                         config['dropout_fused'])
+        fusion_features_cfg = config['obj_features_question']
+        fusion_box_cfg = config['box']
+        fusion_fused_cfg = config['obj_features_obj_features']
+        self.fusion_features = factory_fusion(fusion_features_cfg)
+        self.fusion_box = factory_fusion(fusion_box_cfg)
+        self.fusion_fused = factory_fusion(fusion_fused_cfg)
+    
         
     def pairwise(self, fused_features, bounding_boxes, batch_size, num_obj):
         relations = self.fusion_fused(
