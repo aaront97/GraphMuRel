@@ -27,7 +27,8 @@ class MurelNetDataset(AbstractVQADataset):
                  vqa_dir=vqa_dir, \
                  no_answers=no_answers, \
                  sample_answers=sample_answers, \
-                 skipthoughts_dir=skipthoughts_dir)
+                 skipthoughts_dir=skipthoughts_dir, \
+                 split=split)
         #Change this#########
         self.collate_fn = transforms.Compose([ \
                 transforms.ConvertBatchListToDict(), \
