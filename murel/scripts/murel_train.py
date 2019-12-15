@@ -9,6 +9,8 @@ from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
 from collections import OrderedDict
+import numpy as np
+
 
 def create_summary_writer(model, loader, logdir):
     batch = next(iter(loader))
@@ -98,15 +100,30 @@ def checkpoint(model, epoch, isBest, config, model_dir, writer_dir_name, accurac
         torch.save(model.state_dict(), os.path.join(model_dir, model_name))
     if isBest:
         model_name = writer_dir_name + "_epoch_{}".format(epoch)
-        model_name = writer_dir_name + "_BEST.pth"
+        model_name = model_name + "_BEST.pth"
         torch.save(model.state_dict(), os.path.join(model_dir, model_name))
 
 def generate_state_dict_compatible_with_data_parallel(old_state_dict):
+    print('Generating State Dict compatible with nn.DataParallel by removing leading "module." from keys')
     new_state_dict = OrderedDict()
-    for key, value in old_state_dict.items()
-        new_state_dict[new_state_dict.lstrip('module.')] = value
+    for key, value in old_state_dict.items():
+        if key.startswith('module'):
+            new_state_dict[key[7:]] = value
+        else:
+            new_state_dict[key] = value
     return new_state_dict
-        
+
+def add_module_in_front_of_keys(old_state_dict):
+    print('Generating State Dict compatible with nn.DataParallel by adding leading "module." from keys')
+    new_state_dict = OrderedDict()
+    for key, value in old_state_dict.items():
+        if not key.startswith('module'):
+            new_state_dict['module.' + key] = value 
+        else:
+            new_state_dict[key] = value
+    return new_state_dict
+
+#TODO: FIX
 def load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=True, dataParallel=True):
     best_name = os.path.join(model_dir, writer_dir_name) + "_BEST.pth"
     epoch_list = [f for f in os.listdir(model_dir) if 'epoch' in f and f.startswith(writer_dir_name)]
@@ -114,23 +131,26 @@ def load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_ep
     epoch_no = 0
     if epoch_list and load_last_epoch:
         last_epoch_name = epoch_list[-1]
-        epoch_no = int(last_epoch_name.split("epoch_")[1].strip('.pth'))
+        epoch_no = int(last_epoch_name.split("epoch_")[1].strip('.pth').strip('_BEST'))
         model_dict = torch.load(os.path.join(model_dir, last_epoch_name))
         if dataParallel:
+            model_dict = add_module_in_front_of_keys(model_dict)
             model.load_state_dict(model_dict)
         else:
             model_dict = generate_state_dict_compatible_with_data_parallel(model_dict)
             model.load_state_dict(model_dict)
-        return epoch_no, model
+        return epoch_no + 1, model
     if os.path.exists(best_name) and not load_last_epoch:
-        model_dict = torch.load(os.path.join(model_dir, last_epoch_name))
-        model.load_state_dict(torch.load(best_name))
+        epoch_no = int(best_name.split("epoch_")[1].strip('.pth'))
+        model_dict = torch.load(best_name)
+        model.load_state_dict(model_dict)
         if dataParallel:
+            model_dict = add_module_in_front_of_keys(model_dict)
             model.load_state_dict(model_dict)
         else:
             model_dict = generate_state_dict_compatible_with_data_parallel(model_dict)
             model.load_state_dict(model_dict)
-        return epoch_no, model
+        return epoch_no + 1, model
     else:
         return 0, model
 
@@ -141,24 +161,34 @@ class LR_Scheduler:
         lr_decay_epochs = config['lr_decay_epochs']
         lr_decay_rate = config['lr_decay_rate']
         base_lr = config['lr']
-        gradual_warmup_steps = torch.linspace(gradual_warmup_steps[0], \
-                                              gradual_warmup_steps[1], \
-                                              int(gradual_warmup_steps[2]))
-        self.gradual_warmup_steps = [base_lr * weight for weight in gradual_warmup_steps]
-        self.lr_decay_epochs = list(range(lr_decay_epochs[0], \
-                                          lr_decay_epochs[1], \
-                                          lr_decay_epochs[2]))
         self.lr_decay_rate = lr_decay_rate
         self.base_lr = base_lr
+        self.epoch_to_lr = list(np.linspace(gradual_warmup_steps[0], \
+                                              gradual_warmup_steps[1], \
+                                              int(gradual_warmup_steps[2])))
+        self.epoch_to_lr = [base_lr * weight for weight in self.epoch_to_lr]
+        max_epochs = config['epochs']
+        no_warmup_steps = len(self.epoch_to_lr)
+        lr_decay_epochs = set(list(range(lr_decay_epochs[0], \
+                                          lr_decay_epochs[1], \
+                                          lr_decay_epochs[2] + 1)))
+        for i in range(no_warmup_steps, max_epochs):
+            if i in lr_decay_epochs:
+                self.epoch_to_lr.append(self.epoch_to_lr[-1] * self.lr_decay_rate)
+            else:
+                self.epoch_to_lr.append(self.epoch_to_lr[-1])
+        assert len(self.epoch_to_lr) == max_epochs
     
     def update_lr(self, optimizer, epoch):
-        prev_lr = optimizer.param_groups[0]['lr']
-        if epoch < len(self.gradual_warmup_steps):
-            optimizer.param_groups[0]['lr'] = self.gradual_warmup_steps[epoch]
-        elif epoch in self.lr_decay_epochs:
-            optimizer.param_groups[0]['lr'] = prev_lr * self.lr_decay_rate
-        else:
-            optimizer.param_groups[0]['lr'] = prev_lr
+        optimizer.param_groups[0]['lr'] = self.epoch_to_lr[epoch]
+#         prev_lr = optimizer.param_groups[0]['lr']
+        
+#         if epoch < len(self.gradual_warmup_steps):
+#             optimizer.param_groups[0]['lr'] = self.gradual_warmup_steps[epoch]
+#         elif epoch in self.lr_decay_epochs:
+#             optimizer.param_groups[0]['lr'] = prev_lr * self.lr_decay_rate
+#         else:
+#             optimizer.param_groups[0]['lr'] = prev_lr
 
 def run():
     with open('murel.yaml') as f:
@@ -175,6 +205,8 @@ def run():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('CUDA AVAILABILITY: {}, Device used: {}'.format(torch.cuda.is_available(), device))
     
+
+    
     train_dataset = MurelNetDataset(split="train", \
                                     txt_enc=config['txt_enc'], \
                                     bottom_up_features_dir=config['bottom_up_features_dir'], \
@@ -189,28 +221,36 @@ def run():
                                     processed_dir=config['processed_dir'], \
                                     ROOT_DIR=ROOT_DIR, \
                                     vqa_dir=config['vqa_dir'])
+    # Applying Catalina's trick, reducing batch size and memory while keeping gradient updates more or less the same
+    # Trick applied at epoch 17, reducing batch size to batch size // 3 and calling optimizer.step() every 3 iterations
+    # and calling loss.backward() every iteration
+    # https://gist.github.com/thomwolf/ac7a7da6b1888c2eeac8ac8b9b05d3d3
+    
+    reduction_factor = config['reduction_factor']
+    batch_size = config['batch_size'] // reduction_factor
     
     train_loader = DataLoader(train_dataset, shuffle=True, \
-                              batch_size=config['batch_size'], \
+                              batch_size=batch_size, \
                              num_workers=config['num_workers'])
     val_loader = DataLoader(val_dataset, shuffle=True, \
-                            batch_size=config['batch_size'], \
+                            batch_size=batch_size, \
                             num_workers=config['num_workers'])
     model = MurelNet(config)
     model.cuda()
+
     if torch.cuda.device_count() > 1:
-        model = nn.DataParallel(model)
+        print('Initialising DataParallel with more than one device')
+        model = nn.DataParallel(model, device_ids=[1, 2])
         start_epoch, model = load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=config['load_last_epoch'], dataParallel=True)
     else:
         start_epoch, model = load_checkpoint_if_available(model, model_dir, writer_dir_name, load_last_epoch=config['load_last_epoch'], dataParallel=False)
+    print('Model loaded, all keys matched successfully')
     
     print('Starting from EPOCH {}'.format(start_epoch))
     optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'])
     lr_scheduler = LR_Scheduler(config)
     criterion = nn.NLLLoss()
-    
 
-    
     max_accuracy = -1
     global_iteration = 0
     for epoch in tqdm.tqdm(range(start_epoch, config['epochs'])):
@@ -219,10 +259,10 @@ def run():
         pbar = tqdm.tqdm(train_loader)
         local_iteration = 0
         lr_scheduler.update_lr(optimizer, epoch)
+        optimizer.zero_grad()
         for data in pbar:
             global_iteration += 1
             local_iteration += 1
-            
             pbar.set_description("Epoch[{}] Iteration[{}/{}]".format(epoch, \
                                  local_iteration, len(train_loader)))
             item = {\
@@ -231,15 +271,28 @@ def run():
                     'bounding_boxes': data['bounding_boxes'].cuda(), \
                     'answer_id': torch.squeeze(data['answer_id']).cuda()
             }
+
+#             optimizer.zero_grad()
+#             inputs, labels = item, item['answer_id']
+#             outputs = model(inputs)
+#             loss = criterion(outputs,labels)
+#             loss.backward()
+#             optimizer.step()
+#             running_loss += loss.item()
+                
             inputs, labels = item, item['answer_id']
-            optimizer.zero_grad()
             outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs, labels) / reduction_factor
             loss.backward()
-            optimizer.step()
-            running_loss += loss.item()
-            if local_iteration % config['log_every'] == 0:
-                running_loss = running_loss / 50
+            if local_iteration % reduction_factor == 0:
+                optimizer.step()
+                optimizer.zero_grad()
+            running_loss += loss.item() * reduction_factor
+
+
+
+            if local_iteration % (config['log_every'] * reduction_factor) == 0:
+                running_loss = running_loss / (config['log_every'] * reduction_factor)
                 print("Epoch[{}] Iteration[{}/{}] Loss: {:.2f}".format(epoch, \
                       local_iteration, len(train_loader), running_loss))
                 writer.add_scalar("training/loss", running_loss, global_iteration )

@@ -6,6 +6,7 @@ murel_options:
     vqa_dir: '/auto/homes/bat34/VQA'
     txt_enc: "BayesianUniSkip"
     batch_size: 84
+    reduction_factor: 2
     lr: 0.0003
     gradual_warmup_steps: [0.5, 2.0, 7.0] #torch.linspace
     lr_decay_epochs: [14, 24, 2] #range

@@ -16,7 +16,7 @@ class AbstractVQADataset(Dataset):
         sample_answers=False,\
         skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts', 
         split='train'):
-       
+        self.split = split
         self.no_answers = no_answers
         self.skipthoughts_dir = skipthoughts_dir
         self.vqa_dir = vqa_dir
