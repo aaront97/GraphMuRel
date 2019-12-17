@@ -47,8 +47,11 @@ class MurelCell(nn.Module):
         return res
     
     def forward(self, question_embedding, object_features_list, bounding_boxes, batch_size, num_obj):
-        fused_question_object = self.fuse_object_features_with_questions(object_features_list, question_embedding, \
-                                                          batch_size, num_obj)
+        fused_question_object = self.fuse_object_features_with_questions(\
+                                                                         object_features_list, \
+                                                                         question_embedding, \
+                                                                         batch_size, \
+                                                                         num_obj)
         pairwise_res = self.pairwise(fused_question_object, bounding_boxes, batch_size, num_obj)
         res = object_features_list + pairwise_res
         return res

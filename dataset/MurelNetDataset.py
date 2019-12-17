@@ -31,7 +31,8 @@ class MurelNetDataset(AbstractVQADataset):
                  split=split)
         #Change this#########
         self.collate_fn = transforms.Compose([ \
-                transforms.ConvertBatchListToDict(), \
+                transforms.ConvertBatchListToDict(),
+                transforms.PadQuestions(), \
                 ]) if collate_fn is None else collate_fn
         ############
         self.bottom_up_features_dir = bottom_up_features_dir
@@ -45,16 +46,13 @@ class MurelNetDataset(AbstractVQADataset):
         item = {}
         question = self.dataset['questions'][idx]
         item['index'] = idx
-        item['question_id'] = question['question_id']
+        item['question_ids'] = torch.LongTensor(question['question_ids'])
+        item['question_lengths'] = torch.LongTensor([len(question['question_ids'])])
         item['image_name'] = question['image_name']
-        question_ids = torch.LongTensor([question['question_ids']])
         image_name = question['image_name']
-        question_vector = self.text_enc(question_ids, [len(question_ids)])
-        question_vector = torch.squeeze(question_vector).detach()
         dict_features = torch.load(os.path.join(self.bottom_up_features_dir, image_name ) + '.pth')
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
-        item['question_embedding'] = question_vector
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])

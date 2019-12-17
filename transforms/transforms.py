@@ -3,14 +3,34 @@ import collections
 class Compose:
     def __init__(self, transform_list):
         self.transform_list = transform_list
+        
     def __call__(self, batch):
         for trfm in self.transform_list:
             batch = trfm(batch)
         return batch
+    
+class PadQuestions:
+    def __init__(self):
+        pass
+    
+    def __call__(self, batch):
+        if isinstance(batch, collections.Mapping) and 'question_ids' in batch:
+            max_dim = torch.max(torch.squeeze(batch['question_lengths'])).item()
+            res = []
+            for ids in batch['question_ids']:
+                padded = torch.new_full((max_dim), 0, dtype=torch.int64)
+                padded[:ids.size(0)] = ids
+                res.append(padded)
+            batch['question_ids'] = res
+            return batch
+                
+        else:
+            return batch
 
 class ConvertBatchListToDict:
     def __init__(self):
         pass
+    
     def __call__(self, batch):
         return self.convertBLtoD(batch)
     
@@ -23,6 +43,7 @@ class ConvertBatchListToDict:
 class CreateBatchItem:
     def __init__(self):
         pass
+    
     def __call__(self, batch):
         return self._createBatchItem(batch)
     
@@ -44,6 +65,7 @@ class PrepareBaselineBatch:
 class PrepareBaselineTestBatch:
     def __init__(self):
         pass
+    
     def __call__(self, batch):
         return self._createBatchTestItem(batch)
     

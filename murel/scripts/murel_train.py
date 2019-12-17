@@ -171,7 +171,7 @@ class LR_Scheduler:
         no_warmup_steps = len(self.epoch_to_lr)
         lr_decay_epochs = set(list(range(lr_decay_epochs[0], \
                                           lr_decay_epochs[1], \
-                                          lr_decay_epochs[2] + 1)))
+                                          lr_decay_epochs[2])))
         for i in range(no_warmup_steps, max_epochs):
             if i in lr_decay_epochs:
                 self.epoch_to_lr.append(self.epoch_to_lr[-1] * self.lr_decay_rate)
@@ -266,7 +266,7 @@ def run():
             pbar.set_description("Epoch[{}] Iteration[{}/{}]".format(epoch, \
                                  local_iteration, len(train_loader)))
             item = {\
-                    'question_embedding': data['question_embedding'].cuda(), \
+                    'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
                     'bounding_boxes': data['bounding_boxes'].cuda(), \
                     'answer_id': torch.squeeze(data['answer_id']).cuda()
@@ -284,6 +284,7 @@ def run():
             outputs = model(inputs)
             loss = criterion(outputs, labels) / reduction_factor
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), config['grad_clip'])
             if local_iteration % reduction_factor == 0:
                 optimizer.step()
                 optimizer.zero_grad()
