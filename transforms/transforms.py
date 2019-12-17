@@ -14,11 +14,11 @@ class PadQuestions:
         pass
     
     def __call__(self, batch):
-        if isinstance(batch, collections.Mapping) and 'question_ids' in batch:
+        if isinstance(batch, collections.Mapping):
             max_dim = torch.max(torch.squeeze(batch['question_lengths'])).item()
             res = []
             for ids in batch['question_ids']:
-                padded = torch.new_full((max_dim), 0, dtype=torch.int64)
+                padded = ids.new_full((max_dim, ), 0)
                 padded[:ids.size(0)] = ids
                 res.append(padded)
             batch['question_ids'] = res
