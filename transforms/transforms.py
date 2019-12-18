@@ -15,7 +15,7 @@ class PadQuestions:
     
     def __call__(self, batch):
         if isinstance(batch, collections.Mapping):
-            max_dim = torch.max(torch.squeeze(batch['question_lengths'])).item()
+            max_dim = max([int(item) for item in batch['question_lengths']])
             res = []
             for ids in batch['question_ids']:
                 padded = ids.new_full((max_dim, ), 0)

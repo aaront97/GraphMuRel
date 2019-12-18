@@ -231,10 +231,12 @@ def run():
     
     train_loader = DataLoader(train_dataset, shuffle=True, \
                               batch_size=batch_size, \
-                             num_workers=config['num_workers'])
+                              num_workers=config['num_workers'], \
+                              collate_fn=train_dataset.collate_fn)
     val_loader = DataLoader(val_dataset, shuffle=True, \
                             batch_size=batch_size, \
-                            num_workers=config['num_workers'])
+                            num_workers=config['num_workers'], \
+                            collate_fn=val_dataset.collate_fn)
     model = MurelNet(config)
     model.cuda()
 
