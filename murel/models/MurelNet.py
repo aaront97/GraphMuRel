@@ -7,13 +7,13 @@ from dataset.TextEncFactory import get_text_enc
 from dataset.auxiliary_functions import masked_softmax
 
 class MurelNet(nn.Module):
-    def __init__(self, config, txt_enc):
+    def __init__(self, config, word_vocabulary):
         super(MurelNet, self).__init__()
         self.murel_cell = MurelCell(config['fusion'])
         self.final_fusion = factory_fusion(config['fusion']['final_fusion'])
         self.unroll_steps = config['unroll_steps']
         self.log_softmax = nn.LogSoftmax(dim=1)
-        self.txt_enc = txt_enc
+        self.txt_enc = get_text_enc(config, word_vocabulary)
         self.linear0 = nn.Linear(config['q_att']['linear0']['input_dim'], \
                                  config['q_att']['linear0']['output_dim'])
         self.linear1 = nn.Linear(config['q_att']['linear1']['input_dim'], \

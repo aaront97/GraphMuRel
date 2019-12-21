@@ -37,7 +37,7 @@ class MurelNetDataset(AbstractVQADataset):
         ############
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
-        self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
+        #self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
         
     def __len__(self):
         return len(self.dataset['questions'])

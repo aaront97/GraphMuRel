@@ -1,6 +1,7 @@
 from skipthoughts import BayesianUniSkip, UniSkip, BiSkip, DropUniSkip
 
-def get_text_enc(skipthoughts_dir, text_enc, vocab):
+def get_text_enc(config, vocab):
+    skipthoughts_dir, text_enc = config['skipthoughts_dir'], config['text_enc']
     if text_enc == 'BayesianUniSkip':
         return BayesianUniSkip(skipthoughts_dir, vocab)
     if text_enc == 'UniSkip':
