@@ -1,12 +1,25 @@
-baseline_options:
-    dropout: 0.25
-    txt_enc: "BayesianUniSkip"
-    batch_size: 1024
-    lr: 0.0001
-    weight_decay: 0
-    max_depth: 3
-    min_depth: 3
-    epochs: 15
-    checkpoint_every: 5
-    num_workers: 16
-    load_last_epoch: Yes
+name: concat_baseline_self_attention
+dropout: 0.25
+txt_enc: "BayesianUniSkip"
+batch_size: 256
+lr: 0.0005
+epochs: 15
+checkpoint_every: 5
+num_workers: 16
+input_dim: 8896 # 2400 * 2 + 2048 * 2
+out_dim: 3000
+hidden_list: [1600, 1600]
+obj_att:
+    obj_linear0:
+        input_dim: 2048
+        output_dim: 512
+    obj_linear1:
+        input_dim: 512
+        output_dim: 2
+q_att:
+    q_linear0:
+        input_dim: 2400
+        output_dim: 512
+    q_linear1:
+        input_dim: 512
+        output_dim: 2

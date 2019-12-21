@@ -26,15 +26,14 @@ class ConcatBaselineDataset(AbstractVQADataset):
                 sample_answers=sample_answers,
                 skipthoughts_dir=skipthoughts_dir)
         
-        self.is_test_dev = is_test_dev
         self.collate_fn = transforms.Compose([ \
                 transforms.ConvertBatchListToDict(), \
                 transforms.CreateBatchItem() \
                 ]) if collate_fn is None else collate_fn
-        self.image_features = torch.load( \
-               os.path.join(preprocessed_images_dir, split, \
-                'baseline_{}_cnn_features.pth'.format(split)))
-        
+#        self.image_features = torch.load( \
+#               os.path.join(preprocessed_images_dir, split, \
+#                'baseline_{}_cnn_features.pth'.format(split)))
+#        
         self.split = split
         skipthoughts_dir = os.path.join(ROOT_DIR, 'data', 'skipthoughts')
         self.text_enc = get_text_enc(skipthoughts_dir, txt_enc, [word for key, word in self.wid_to_word.items()])
