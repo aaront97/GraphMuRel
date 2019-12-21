@@ -38,11 +38,11 @@ def val_evaluate(model, epoch, val_loader, writer, criterion):
     with torch.no_grad():
         for data in val_loader:
             item = {\
-                    'question_ids': torch.stack(data['question_ids']).cuda(), \
+                    'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
                     'bounding_boxes': data['bounding_boxes'].cuda(), \
                     'answer_id': torch.squeeze(data['answer_id']).cuda(), \
-                    'question_lengths': torch.stack(data['question_lengths']).cuda(), \
+                    'question_lengths': data['question_lengths'].cuda(), \
             }
             inputs, labels = item, item['answer_id']
             outputs = model(inputs)
@@ -69,11 +69,11 @@ def train_evaluate(model, epoch, train_loader, writer, criterion):
     with torch.no_grad():
         for data in train_loader:
             item = {\
-                    'question_ids': torch.stack(data['question_ids']).cuda(), \
+                    'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
                     'bounding_boxes': data['bounding_boxes'].cuda(), \
                     'answer_id': torch.squeeze(data['answer_id']).cuda(), \
-                    'question_lengths' = torch.stack(data['question_lengths']).cuda(), \
+                    'question_lengths' : data['question_lengths'].cuda(), \
             }
             inputs, labels = item, item['answer_id']
             outputs = model(inputs)
@@ -203,7 +203,7 @@ def run():
         start_epoch = 0
     
     max_accuracy = -1
-    if config['resume_last'] and (os.path.exists(best_model_file_name) or os.path.exists(checkpoint_file_name)):
+    if config['checkpoint_option'] == 'resume_last' and (os.path.exists(best_model_file_name) or os.path.exists(checkpoint_file_name)):
         max_accuracy = get_max_accuracy(checkpoint_file_name, best_model_file_name)
     
     

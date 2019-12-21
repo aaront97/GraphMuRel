@@ -35,7 +35,7 @@ class MurelNet(nn.Module):
 
         # http://juditacs.github.io/2018/12/27/masked-attention.html
         # Compute attention weights such that the padded units give 0 attention weights
-        q_att = masked_softmax(q_att)
+        q_att = masked_softmax(q_att, question_lengths)
         # Glimpses contain attention values for each question_feature DIM: BATCH_SIZE x NO_WORDS
         glimpses = torch.unbind(q_att, dim=2)
         attentioned_glimpses = []
