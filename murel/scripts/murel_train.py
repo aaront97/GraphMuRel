@@ -38,10 +38,11 @@ def val_evaluate(model, epoch, val_loader, writer, criterion):
     with torch.no_grad():
         for data in val_loader:
             item = {\
-                    'question_embedding': data['question_embedding'].cuda(), \
+                    'question_ids': torch.stack(data['question_ids']).cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
                     'bounding_boxes': data['bounding_boxes'].cuda(), \
-                    'answer_id': torch.squeeze(data['answer_id']).cuda()
+                    'answer_id': torch.squeeze(data['answer_id']).cuda(), \
+                    'question_lengths': torch.stack(data['question_lengths']).cuda(), \
             }
             inputs, labels = item, item['answer_id']
             outputs = model(inputs)
@@ -68,10 +69,11 @@ def train_evaluate(model, epoch, train_loader, writer, criterion):
     with torch.no_grad():
         for data in train_loader:
             item = {\
-                    'question_embedding': data['question_embedding'].cuda(), \
+                    'question_ids': torch.stack(data['question_ids']).cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
                     'bounding_boxes': data['bounding_boxes'].cuda(), \
-                    'answer_id': torch.squeeze(data['answer_id']).cuda()
+                    'answer_id': torch.squeeze(data['answer_id']).cuda(), \
+                    'question_lengths' = torch.stack(data['question_lengths']).cuda(), \
             }
             inputs, labels = item, item['answer_id']
             outputs = model(inputs)
@@ -229,7 +231,8 @@ def run():
                     'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
                     'bounding_boxes': data['bounding_boxes'].cuda(), \
-                    'answer_id': torch.squeeze(data['answer_id']).cuda()
+                    'answer_id': torch.squeeze(data['answer_id']).cuda(), \
+                    'question_lengths': data['question_lengths'].cuda()
             }
 
 #             optimizer.zero_grad()

@@ -33,6 +33,7 @@ class MurelNetDataset(AbstractVQADataset):
         self.collate_fn = transforms.Compose([ \
                 transforms.ConvertBatchListToDict(),
                 transforms.PadQuestions(), \
+                transforms.StackTensors(), \
                 ]) if collate_fn is None else collate_fn
         ############
         self.bottom_up_features_dir = bottom_up_features_dir

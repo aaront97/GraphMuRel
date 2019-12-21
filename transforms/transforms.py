@@ -39,7 +39,18 @@ class ConvertBatchListToDict:
             return {key: [d[key] for d in batch] for key in batch[0]}
         else:
             return batch
+        
+class StackTensors:
+    def __init__(self):
+        pass
+       
+    def __call__(self, batch):
+        for key in batch:
+            if isinstance(batch[key], collections.Sequence) and torch.is_tensor(batch[key][0]):
+                batch[key] = torch.stack(batch[key])
+        return batch
 
+        
 class CreateBatchItem:
     def __init__(self):
         pass

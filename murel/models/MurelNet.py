@@ -26,8 +26,8 @@ class MurelNet(nn.Module):
         question_lengths = item['question_lengths']
         
         #q_att
-        question_each_word_embedding = self.text_enc.embedding(question_ids)
-        question_features, question_final_feature = self.text_enc.rnn(question_each_word_embedding)
+        question_each_word_embedding = self.txt_enc.embedding(question_ids)
+        question_features, question_final_feature = self.txt_enc.rnn(question_each_word_embedding)
         
         q_att = self.linear0(question_features)
         q_att = torch.nn.functional.relu(q_att)
