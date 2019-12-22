@@ -30,6 +30,7 @@ class ConcatBaselineNet(nn.Module):
         for length1, length2 in zip(self.hidden_list[:-1], self.hidden_list[1:]):
             self.hidden.append(nn.Linear(length1, length2))
         self.last_layer = nn.Linear(self.hidden_list[-1], self.out_dim)
+        self.log_softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, item):
         question_ids = item['question_ids']
@@ -50,6 +51,7 @@ class ConcatBaselineNet(nn.Module):
             x = F.relu(x)
             x = F.dropout(x)
         x = self.last_layer(x)
+        x = self.log_softmax(x)
         return x
     
     def self_attention_object(self, object_features):
@@ -57,7 +59,7 @@ class ConcatBaselineNet(nn.Module):
         obj_att = torch.nn.functional.relu(obj_att)
         obj_att = self.obj_linear1(obj_att)
         
-        obj_att = torch.nn.functional.softmax(obj_att, dim=1)
+        obj_att = torch.softmax(obj_att, dim=1)
         glimpses = torch.unbind(obj_att, dim=2)
         attentioned_glimpses = []
         for glimpse in glimpses:

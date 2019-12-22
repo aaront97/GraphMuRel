@@ -1,5 +1,5 @@
 name: murel
-checkpoint_option: fresh  #can be 'best' or 'fresh' or 'resume_last'
+checkpoint_option: best  #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
@@ -14,7 +14,7 @@ gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 epochs: 25
-checkpoint_every: 5
+checkpoint_every: 1
 num_workers: 4
 load_last_epoch: True
 unroll_steps: 3

@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import os
 import yaml
 from dataset.MurelNetDataset import MurelNetDataset
-from murel.models.MurelNet import MurelNet
+from baseline.models.ConcatBaselineNet import ConcatBaselineNet
 from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
@@ -40,7 +40,6 @@ def val_evaluate(model, epoch, val_loader, writer, criterion):
             item = {\
                     'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
-                    'bounding_boxes': data['bounding_boxes'].cuda(), \
                     'answer_id': torch.squeeze(data['answer_id']).cuda(), \
                     'question_lengths': data['question_lengths'].cuda(), \
             }
@@ -71,7 +70,6 @@ def train_evaluate(model, epoch, train_loader, writer, criterion):
             item = {\
                     'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
-                    'bounding_boxes': data['bounding_boxes'].cuda(), \
                     'answer_id': torch.squeeze(data['answer_id']).cuda(), \
                     'question_lengths' : data['question_lengths'].cuda(), \
             }
@@ -140,18 +138,15 @@ def get_dirs(config, include_keys=[]):
 
 #Fix dirs
 def run():
-    with open('murel.yaml') as f:
+    with open('baseline.yaml') as f:
         config = yaml.load(f)
     ROOT_DIR = config['ROOT_DIR']
-    names = get_dirs(config, include_keys=['txt_enc', 'batch_size', 'lr', 'lr_decay_rate', \
-                                                    'unroll_steps', 'fusion_type'])
+    names = get_dirs(config, include_keys=['txt_enc', 'batch_size', 'lr', 'lr_decay_rate', 'hidden_list'])
     
     
     writer = SummaryWriter(logdir=names['log_dir'])
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('CUDA AVAILABILITY: {}, Device used: {}'.format(torch.cuda.is_available(), device))
-    
-
     
     train_dataset = MurelNetDataset(split="train", \
                                     txt_enc=config['txt_enc'], \
@@ -185,7 +180,7 @@ def run():
     word_vocabulary = [word for _, word in train_dataset.word_to_wid.items()]
     
     #Build model
-    model = MurelNet(config, word_vocabulary)
+    model = ConcatBaselineNet(config, word_vocabulary)
     
     #Transfer model to GPU
     model = model.cuda()
@@ -194,6 +189,9 @@ def run():
     checkpoint_dir, best_model_dir = names['checkpoint_dir'], names['best_model_dir']
     checkpoint_file_name, best_model_file_name = names['checkpoint_file_name'], names['best_model_file_name']
     
+    print('Checkpoint File Name: {}'.format(checkpoint_file_name))
+    print('Best Model File Name: {}'.format(best_model_file_name))
+    print('Log File Name: {}'.format(names['log_dir']))
     
     if config['checkpoint_option'] == 'resume_last':
         model, optimizer, start_epoch = load_checkpoint(checkpoint_file_name, model, optimizer)
@@ -231,7 +229,6 @@ def run():
             item = {\
                     'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
-                    'bounding_boxes': data['bounding_boxes'].cuda(), \
                     'answer_id': torch.squeeze(data['answer_id']).cuda(), \
                     'question_lengths': data['question_lengths'].cuda()
             }
@@ -248,7 +245,7 @@ def run():
             outputs = model(inputs)
             loss = criterion(outputs, labels) / reduction_factor
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), config['grad_clip'])
+            #torch.nn.utils.clip_grad_norm_(model.parameters(), config['grad_clip'])
             if local_iteration % reduction_factor == 0:
                 optimizer.step()
                 optimizer.zero_grad()
