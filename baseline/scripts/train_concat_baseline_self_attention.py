@@ -218,7 +218,7 @@ def run():
         running_loss = 0.0
         pbar = tqdm.tqdm(train_loader)
         local_iteration = 0
-        lr_scheduler.update_lr(optimizer, epoch)
+        #lr_scheduler.update_lr(optimizer, epoch)
         print('Current learning rate {}'.format(optimizer.param_groups[0]['lr']))
         optimizer.zero_grad()
         for data in pbar:

@@ -7,8 +7,8 @@ vqa_dir: '/auto/homes/bat34/VQA'
 checkpoint_option: fresh #can be best, fresh, or resume_last
 dropout: 0.2
 txt_enc: BayesianUniSkip
-batch_size: 256
-lr: 0.0005
+batch_size: 200
+lr: 0.0001
 epochs: 25
 checkpoint_every: 1
 reduction_factor: 8
@@ -20,9 +20,21 @@ gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 hidden_list: [1600, 1600]
+attention_fusion_type: concat_mlp
+attention_fusion:
+    input_dims: [4800, 2048]
+    out_dim: 1000
+    dropout: 0.2
+    hidden_list: [1600, 1600]
+final_fusion_type: mlp
+final_fusion:
+    input_dims: [4800, 4096]
+    out_dim: 3000
+    dropout: 0.2
+    hidden_list: [1600, 1600]
 obj_att:
     obj_linear0:
-        input_dim: 2048
+        input_dim: 1000
         output_dim: 512
     obj_linear1:
         input_dim: 512

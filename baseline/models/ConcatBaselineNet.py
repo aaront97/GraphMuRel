@@ -3,19 +3,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 from dataset.auxiliary_functions import masked_softmax
 from dataset.TextEncFactory import get_text_enc
+from baseline.models.mlp import ConcatMLP
 
 class ConcatBaselineNet(nn.Module):
-    #Todo Dropout?
     def __init__(self, config, word_vocabulary):
-        #Hidden list expects a list of arguments that specifies
-        #The depth and length of the hidden layers, e.g.
-        # [4448, 1024, 512, 3000]
         super(ConcatBaselineNet, self).__init__()
-        self.input_dim = config['input_dim']
-        self.out_dim = config['out_dim']
-        self.dropout = config['dropout']
-        self.hidden_list = config['hidden_list']
-        self.hidden = nn.ModuleList([nn.Linear(self.input_dim, self.hidden_list[0])])
+        
+        
+        if config['attention_fusion_type'] == 'concat_mlp':
+            self.attention_fusion = ConcatMLP(config['attention_fusion'])
+        else:
+            raise ValueError('Unimplemented attention fusion')
+        
+        if config['final_fusion_type'] == 'concat_mlp':
+            self.final_fusion = ConcatMLP(config['final_fusion'])
+        else:
+            raise ValueError('Unimplemented final fusion')
+            
         self.txt_enc = get_text_enc(config, word_vocabulary)
         self.q_linear0 = nn.Linear(config['q_att']['q_linear0']['input_dim'], \
                                  config['q_att']['q_linear0']['output_dim'])
@@ -27,9 +31,7 @@ class ConcatBaselineNet(nn.Module):
         self.obj_linear1 = nn.Linear(config['obj_att']['obj_linear1']['input_dim'], \
                                  config['obj_att']['obj_linear1']['output_dim'])
         
-        for length1, length2 in zip(self.hidden_list[:-1], self.hidden_list[1:]):
-            self.hidden.append(nn.Linear(length1, length2))
-        self.last_layer = nn.Linear(self.hidden_list[-1], self.out_dim)
+
         self.log_softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, item):
@@ -41,36 +43,36 @@ class ConcatBaselineNet(nn.Module):
         question_features, question_final_feature = self.txt_enc.rnn(question_each_word_embedding)
         
         question_attentioned = self.self_attention_question(question_features, question_lengths)
-        object_attentioned = self.self_attention_object(object_features_list)
+        
+        
+        object_attentioned = self.compute_object_attention_with_question(question_attentioned, object_features_list)
+        
         
         # Construct training vector
-        x = torch.cat([question_attentioned, object_attentioned], dim=1)
-        
-        for layer in self.hidden:
-            x = layer(x)
-            x = F.relu(x)
-            x = F.dropout(x)
-        x = self.last_layer(x)
+        x = self.final_fusion([question_attentioned, object_attentioned])
         x = self.log_softmax(x)
         return x
     
-    def self_attention_object(self, object_features):
-        obj_att = self.obj_linear0(object_features)
-        obj_att = torch.nn.functional.relu(obj_att)
-        obj_att = self.obj_linear1(obj_att)
+    def compute_object_attention_with_question(self, question_self_attentioned, object_features_list):
+        batch_size, no_objects = object_features_list.size(0), object_features_list.size(1)
+        question_self_attentioned_expanded = question_self_attentioned.unsqueeze(1).expand_as(object_features_list)
+        fused = self.attention_fusion([question_self_attentioned_expanded.contiguous().view(batch_size, no_objects, \
+                                       object_features_list.contiguous().view(batch_size, no_objects))])
+        fused = fused.view(batch_size, no_objects, -1)
+        fused_att = self.obj_linear0(fused)
+        fused_att = F.relu(fused_att)
+        fused_att = self.obj_linear1(fused_att)
+        fused_att = F.softmax(fused_att, dim=1)
         
-        obj_att = torch.softmax(obj_att, dim=1)
-        glimpses = torch.unbind(obj_att, dim=2)
+        glimpses = torch.unbind(fused_att, dim=2)
         attentioned_glimpses = []
         for glimpse in glimpses:
-            glimpse = glimpse.unsqueeze(2).expand(-1, -1, object_features.size(-1))
-            attentioned_feature = object_features * glimpse
+            glimpse = glimpse.unsqueeze(2).expand(-1, -1, object_features_list.size(-1))
+            attentioned_feature = object_features_list * glimpse
             attentioned_feature = torch.sum(attentioned_feature, dim=1)
             attentioned_glimpses.append(attentioned_feature)
-        object_attentioned = torch.cat(attentioned_glimpses, dim=1)
-        return object_attentioned
-        
-    
+        fused_attentioned = torch.cat(attentioned_glimpses, dim=1)
+        return fused_attentioned
     
     def self_attention_question(self, question_features, question_lengths):
         q_att = self.q_linear0(question_features)
