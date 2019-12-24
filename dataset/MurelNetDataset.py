@@ -46,6 +46,7 @@ class MurelNetDataset(AbstractVQADataset):
         item = {}
         question = self.dataset['questions'][idx]
         item['index'] = idx
+        item['question_unique_id'] = question['question_id'] 
         item['question_ids'] = torch.LongTensor(question['question_ids'])
         item['question_lengths'] = torch.LongTensor([len(question['question_ids'])])
         item['image_name'] = question['image_name']
