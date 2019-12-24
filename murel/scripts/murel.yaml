@@ -1,5 +1,5 @@
-name: murel
-checkpoint_option: resume_last  #can be 'best' or 'fresh' or 'resume_last'
+name: murel_reverse_question_object
+checkpoint_option: fresh  #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
@@ -30,7 +30,7 @@ q_att:
 fusion:
     obj_features_question:
         type: block
-        input_dims: [2048, 4800]
+        input_dims: [4800, 2400]
         output_dims: 2048
         dropout_prelin: 0.
         dropout_input: 0.1
@@ -57,7 +57,7 @@ fusion:
         mm_dim: 200
     final_fusion:
         type: block
-        input_dims: [2048, 4800]
+        input_dims: [4800, 2400]
         output_dims: 3000
         dropout_prelin: 0.1
         dropout_input: 0.
