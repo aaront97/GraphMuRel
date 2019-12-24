@@ -4,7 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 class ConcatMLP(nn.Module):
     def __init__(self, config):
-        self.input_dims = config['input_dim']
+        super(ConcatMLP, self).__init__()
+        self.input_dims = config['input_dims']
         self.input_dim = sum(self.input_dims)
         self.out_dim = config['out_dim']
         self.dropout = config['dropout']

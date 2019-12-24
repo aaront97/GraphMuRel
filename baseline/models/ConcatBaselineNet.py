@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from dataset.auxiliary_functions import masked_softmax
 from dataset.TextEncFactory import get_text_enc
-from baseline.models.mlp import ConcatMLP
+from baseline.models.ConcatMLP import ConcatMLP
 
 class ConcatBaselineNet(nn.Module):
     def __init__(self, config, word_vocabulary):
@@ -55,9 +55,9 @@ class ConcatBaselineNet(nn.Module):
     
     def compute_object_attention_with_question(self, question_self_attentioned, object_features_list):
         batch_size, no_objects = object_features_list.size(0), object_features_list.size(1)
-        question_self_attentioned_expanded = question_self_attentioned.unsqueeze(1).expand_as(object_features_list)
-        fused = self.attention_fusion([question_self_attentioned_expanded.contiguous().view(batch_size, no_objects, \
-                                       object_features_list.contiguous().view(batch_size, no_objects))])
+        question_self_attentioned_expanded = question_self_attentioned.unsqueeze(1).expand(-1, no_objects, -1)
+        fused = self.attention_fusion([question_self_attentioned_expanded.contiguous().view(batch_size * no_objects, -1), \
+                                       object_features_list.contiguous().view(batch_size * no_objects, -1)])
         fused = fused.view(batch_size, no_objects, -1)
         fused_att = self.obj_linear0(fused)
         fused_att = F.relu(fused_att)

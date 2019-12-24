@@ -108,9 +108,9 @@ def load_checkpoint(file_name, model, optimizer):
 def get_max_accuracy(checkpoint_file_name, best_model_file_name):
     res = -1
     if os.path.exists(checkpoint_file_name):
-        res = max(torch.load(checkpoint_file_name)['accuracy'])
+        res = max(torch.load(checkpoint_file_name)['accuracy'], res)
     if os.path.exists(best_model_file_name):
-        res = max(torch.load(best_model_file_name)['accuracy'])
+        res = max(torch.load(best_model_file_name)['accuracy'], res)
     return res
 
 def get_dirs(config, include_keys=[]):

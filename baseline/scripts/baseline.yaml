@@ -4,17 +4,15 @@ bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_3
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
 vqa_dir: '/auto/homes/bat34/VQA'
-checkpoint_option: fresh #can be best, fresh, or resume_last
+checkpoint_option: resume_last #can be best, fresh, or resume_last
 dropout: 0.2
 txt_enc: BayesianUniSkip
-batch_size: 200
+batch_size: 256
 lr: 0.0001
-epochs: 25
+epochs: 22
 checkpoint_every: 1
 reduction_factor: 8
 num_workers: 4
-input_dim: 8896
-out_dim: 3000
 log_every: 50
 gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
@@ -26,7 +24,7 @@ attention_fusion:
     out_dim: 1000
     dropout: 0.2
     hidden_list: [1600, 1600]
-final_fusion_type: mlp
+final_fusion_type: concat_mlp
 final_fusion:
     input_dims: [4800, 4096]
     out_dim: 3000
