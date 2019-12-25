@@ -36,7 +36,7 @@ def val_evaluate(model, epoch, val_loader, writer, criterion):
     count = 1
     evaluator_criterion = nn.NLLLoss(reduction='sum')
     with torch.no_grad():
-        for data in val_loader:
+        for data in tqdm.tqdm(val_loader):
             item = {\
                     'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
@@ -67,7 +67,7 @@ def train_evaluate(model, epoch, train_loader, writer, criterion):
     count = 1
     evaluator_criterion = nn.NLLLoss(reduction='sum')
     with torch.no_grad():
-        for data in train_loader:
+        for data in tqdm.tqdm(train_loader):
             item = {\
                     'question_ids': data['question_ids'].cuda(), \
                     'object_features_list': data['object_features_list'].cuda(), \
@@ -263,7 +263,7 @@ def run():
                 running_loss = 0.0
                 
         #At the end of every epoch, run it on the validation and training dataset
-        train_evaluate(model, epoch, train_loader, writer, criterion)
+        #train_evaluate(model, epoch, train_loader, writer, criterion)
         accuracy = val_evaluate(model, epoch, val_loader, writer, criterion)
         
         isBest = False

@@ -67,7 +67,7 @@ class MurelNet(nn.Module):
                                                    num_obj)
         max_pool, _ = torch.max(object_features_list, dim=1)
         # Sensitive?
-        # scores = self.final_fusion([max_pool, question_attentioned])
-        scores = self.final_fusion([question_attentioned, max_pool])
+        scores = self.final_fusion([max_pool, question_attentioned])
+        #scores = self.final_fusion([question_attentioned, max_pool])
         prob = self.log_softmax(scores)
         return prob
