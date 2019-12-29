@@ -26,6 +26,10 @@ class AbstractVQADataset(Dataset):
         self.processed_dir = processed_dir
         self.sample_answers = sample_answers
         self.exclude_unk_words = exclude_unk_words
+        
+        if self.sample_answers:
+            self.processed_dir = os.path.join(self.processed_dir, 'sample_answers')
+        
         if not os.path.exists(self.processed_dir):
             print('Processing....')
             self.process()
@@ -212,7 +216,6 @@ class AbstractVQADataset(Dataset):
             train_set = self.add_most_frequent_answer(train_set)
             val_set = self.add_most_frequent_answer(val_set)
         else:
-            self.processed_dir = os.path.join(self.processed_dir, 'sampled_answers')
             train_set = self.add_sampled_answer(train_set)
             val_set = self.add_sampled_answer(val_set)
 
