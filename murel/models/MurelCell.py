@@ -40,14 +40,14 @@ class MurelCell(nn.Module):
     
     def fuse_object_features_with_questions(self, object_features_list, question_embedding, batch_size, num_obj):
         # Sensitive?
-        res =  self.fusion_features([ \
-                   object_features_list.contiguous().view(batch_size * num_obj, -1), \
-                   question_embedding
-               ])
 #         res =  self.fusion_features([ \
-#             question_embedding, \
-#             object_features_list.contiguous().view(batch_size * num_obj, -1), \
-#         ])
+#                    object_features_list.contiguous().view(batch_size * num_obj, -1), \
+#                    question_embedding
+#                ])
+        res =  self.fusion_features([ \
+            question_embedding, \
+            object_features_list.contiguous().view(batch_size * num_obj, -1), \
+        ])
         res = res.view(batch_size, num_obj, -1)
         return res
     
