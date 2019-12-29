@@ -1,10 +1,12 @@
 import torch
 from torch.utils.data import Dataset
+from collections import Counter
 import os 
 import progressbar
 import json
 import re
 import subprocess
+import numpy as np
 
 
 class AbstractVQADataset(Dataset):
@@ -15,12 +17,15 @@ class AbstractVQADataset(Dataset):
         no_answers=3000,\
         sample_answers=False,\
         skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts', 
-        split='train'):
+        split='train', \
+        exclude_unk_words=True):
         self.split = split
         self.no_answers = no_answers
         self.skipthoughts_dir = skipthoughts_dir
         self.vqa_dir = vqa_dir
         self.processed_dir = processed_dir
+        self.sample_answers = sample_answers
+        self.exclude_unk_words = exclude_unk_words
         if not os.path.exists(self.processed_dir):
             print('Processing....')
             self.process()
@@ -37,7 +42,8 @@ class AbstractVQADataset(Dataset):
     
 
     def tokenize(self, s):
-        #we don't replace # because # is used to refer to number of items
+        # we don't replace # because # is used to refer to number of items
+        # Tokenizing code taken from Cadene
         s = s.rstrip()
         t_str = s.lower()
         for i in [r'\?',r'\!',r'\'',r'\"',r'\$',r'\:',r'\@',r'\(',r'\)',r'\,',r'\.',r'\;']:
@@ -92,12 +98,37 @@ class AbstractVQADataset(Dataset):
         print('No. of known words: {}, No. of unknown words : {}, Percentage Loss of words: {}%' \
             .format(len(known_words_list), len(unknown_words_list), (len(unknown_words_list) / (len(known_words_list) + len(unknown_words_list))) * 100))
         return list(set(known_words_list)), list(set(unknown_words_list))
+    
+    def return_all_words(self, split_set):
+        print('Disregarding unknown words by the skipthoughts dictionary')
+        known_words_list = []
+        questions_list = split_set['questions']
+        for question_dict in questions_list:
+            for word in question_dict['question_tokens']:
+                known_words_list.append(word)
+        known_words_list = set(known_words_list)
+        return known_words_list
 
     def add_most_frequent_answer(self, split_set):
         for annotation in split_set['annotations']:
             annotation['most_frequent_answer'] = annotation['multiple_choice_answer']
         return split_set
 
+    def add_sampled_answer(self, split_set):
+        for annotation in split_set['annotations']:
+            counter = {}
+            for answer in annotation['answers']:
+                answer_str = answer['answer']
+                if answer_str not in counter:
+                    counter[answer_str] = 0
+                counter[answer_str] += 1
+            answer_str_list = list(counter.keys())
+            answer_str_occurences = [counter[answer_str] for answer_str in answer_str_list]
+            answer_str_probs = answer_str_occurences / np.sum(answer_str_occurences)
+            annotation['most_frequent_answer'] = np.random.choice(answer_str_list, p=answer_str_probs)
+        return split_set
+                
+                
     def add_images(self, split_set):
         for question in split_set['questions']:
             question['image_name'] = 'COCO_%s_%012d.jpg'%(split_set['data_subtype'],question['image_id'])
@@ -176,9 +207,14 @@ class AbstractVQADataset(Dataset):
         train_set = self.add_images(train_set)
         val_set = self.add_images(val_set)
         test_set = self.add_images(test_set)
-
-        train_set = self.add_most_frequent_answer(train_set)
-        val_set = self.add_most_frequent_answer(val_set)
+        
+        if not self.sample_answers:
+            train_set = self.add_most_frequent_answer(train_set)
+            val_set = self.add_most_frequent_answer(val_set)
+        else:
+            self.processed_dir = os.path.join(self.processed_dir, 'sampled_answers')
+            train_set = self.add_sampled_answer(train_set)
+            val_set = self.add_sampled_answer(val_set)
 
         train_set = self.tokenize_questions(train_set)
         val_set = self.tokenize_questions(val_set)
@@ -187,8 +223,11 @@ class AbstractVQADataset(Dataset):
         #We only deal with the top #no_answers
         aid_to_ans = self.get_top_answers(train_set)
         ans_to_aid = {word: index for index, word in enumerate(aid_to_ans)}
-
-        known_words, unknown_words = self.get_known_words(train_set)
+        
+        if self.exclude_unk_words:
+            known_words, _ = self.get_known_words(train_set)
+        else:
+            known_words = self.return_all_words(train_set)
         wid_to_word = {idx: word for idx, word in enumerate(known_words)}
         word_to_wid = {word:idx for idx, word in enumerate(known_words)}
 
