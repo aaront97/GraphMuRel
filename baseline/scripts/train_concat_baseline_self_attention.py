@@ -260,7 +260,7 @@ def run():
                 running_loss = 0.0
                 
         #At the end of every epoch, run it on the validation and training dataset
-        train_evaluate(model, epoch, train_loader, writer, criterion)
+        #train_evaluate(model, epoch, train_loader, writer, criterion)
         accuracy = val_evaluate(model, epoch, val_loader, writer, criterion)
         
         isBest = False

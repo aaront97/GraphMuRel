@@ -1,8 +1,8 @@
-name: concat_baseline_self_attention
+name: concat_baseline_self_attention_sample_ans
 ROOT_DIR: /auto/homes/bat34/VQA_PartII/baseline/
 bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
-processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
+processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/sample_answers'
 vqa_dir: '/auto/homes/bat34/VQA'
 checkpoint_option: resume_last #can be best, fresh, or resume_last
 dropout: 0.2
