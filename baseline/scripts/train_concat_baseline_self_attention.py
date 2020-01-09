@@ -141,7 +141,8 @@ def run():
     with open('baseline.yaml') as f:
         config = yaml.load(f)
     ROOT_DIR = config['ROOT_DIR']
-    names = get_dirs(config, include_keys=['txt_enc', 'batch_size', 'lr', 'lr_decay_rate', 'hidden_list'])
+    names = get_dirs(config, include_keys=['txt_enc', 'batch_size', 'lr', 'lr_decay_rate', 'hidden_list', \
+                                           'attention_fusion_type', 'final_fusion_type'])
     
     
     writer = SummaryWriter(logdir=names['log_dir'])

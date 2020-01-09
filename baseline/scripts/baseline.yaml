@@ -18,14 +18,32 @@ gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 hidden_list: [1600, 1600]
-attention_fusion_type: concat_mlp
-attention_fusion:
+attention_fusion_type: block
+attention_fusion_block:
+    type: block
+    input_dims: [4800, 2048]
+    output_dims: 1000
+    dropout_prelin: 0.
+    dropout_input: 0.1
+    chunks: 20
+    rank: 15
+    mm_dim: 1000
+attention_fusion_mlp:
     input_dims: [4800, 2048]
     out_dim: 1000
     dropout: 0.2
     hidden_list: [1600, 1600]
-final_fusion_type: concat_mlp
-final_fusion:
+final_fusion_type: block
+final_fusion_block:
+    type: block
+    input_dims: [4800, 4096]
+    output_dims: 3000
+    dropout_prelin: 0.1
+    dropout_input: 0.
+    chunks: 20
+    rank: 10
+    mm_dim: 1000
+final_fusion_mlp:
     input_dims: [4800, 4096]
     out_dim: 3000
     dropout: 0.2
