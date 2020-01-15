@@ -1,0 +1,43 @@
+name: agg_concat_max
+agg_type: max
+q_self_attention: True
+checkpoint_option: fresh  #can be best, fresh, or resume_last
+ROOT_DIR: /auto/homes/bat34/VQA_PartII/baseline/
+bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
+skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
+processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/'
+vqa_dir: '/auto/homes/bat34/VQA'
+dropout: 0.2
+txt_enc: BayesianUniSkip
+batch_size: 256
+lr: 0.0001
+epochs: 25
+checkpoint_every: 1
+reduction_factor: 8
+num_workers: 4
+log_every: 50
+gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
+lr_decay_epochs: [14, 24, 2] #range
+lr_decay_rate: .25
+fusion_type: concat_mlp
+fusion_block:
+    type: block
+    input_dims: [4800, 2048]
+    output_dims: 3000
+    dropout_prelin: 0.
+    dropout_input: 0.1
+    chunks: 20
+    rank: 15
+    mm_dim: 1000
+fusion_mlp:
+    input_dims: [4800, 2048]
+    out_dim: 3000
+    dropout: 0.2
+    hidden_list: [3200, 3200]
+q_att:
+    q_linear0:
+        input_dim: 2400
+        output_dim: 512
+    q_linear1:
+        input_dim: 512
+        output_dim: 2
