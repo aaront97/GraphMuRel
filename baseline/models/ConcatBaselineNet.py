@@ -21,7 +21,7 @@ class ConcatBaselineNet(nn.Module):
         if config['final_fusion_type'] == 'concat_mlp':
             self.final_fusion = ConcatMLP(config['final_fusion_mlp'])
         elif config['final_fusion_type'] == 'block':
-            self.final_fusion = factory_fusion(config['attention_fusion_block'])
+            self.final_fusion = factory_fusion(config['final_fusion_block'])
         else:
             raise ValueError('Unimplemented final fusion')
             
