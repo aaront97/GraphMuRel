@@ -61,7 +61,7 @@ class AggConcatNet(nn.Module):
         if agg_type == 'min':
             return torch.min(object_features, dim=1)[0]
         if agg_type == 'sum':
-            return torch.sum(object_features)[0]
+            return torch.sum(object_features, dim=1)
 
     def self_attention_question(self, question_features, question_lengths):
         q_att = self.q_linear0(question_features)

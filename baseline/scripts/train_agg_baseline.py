@@ -150,7 +150,7 @@ def run():
     with open('agg_baseline.yaml') as f:
         config = yaml.load(f)
     ROOT_DIR = config['ROOT_DIR']
-    names = get_dirs(config, include_keys=['agg_type', 'q_self_attention'
+    names = get_dirs(config, include_keys=['agg_type', 'q_self_attention',
                                            'txt_enc', 'batch_size', 'lr',
                                            'fusion_type',
                                            ])
