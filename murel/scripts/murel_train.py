@@ -159,7 +159,7 @@ def run():
     names = get_dirs(config, include_keys=[
                                        'txt_enc',
                                        'pooling_agg',
-                                       'pairwise_aggf'
+                                       'pairwise_agg',
                                        'batch_size',
                                        'lr',
                                        'lr_decay_rate',

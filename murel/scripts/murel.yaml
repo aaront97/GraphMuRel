@@ -7,13 +7,15 @@ processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
 vqa_dir: '/auto/homes/bat34/VQA'
 txt_enc: "BayesianUniSkip"
 pooling_agg: 'min'
-pairwise_agg: 'max' #Remember to change fusion's pairwise_agg too
+pairwise_agg: 'min' #Remember to change fusion's pairwise_agg too
 batch_size: 256
 reduction_factor: 8
 grad_clip: 0.25
 lr: 0.00005
 gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
+#gradual_warmup_steps: [1.0, 10.0, 20]
 lr_decay_epochs: [14, 24, 2] #range
+#lr_decay_epochs: [24, 24, 2]
 lr_decay_rate: .25
 epochs: 25
 checkpoint_every: 1
@@ -30,7 +32,7 @@ q_att:
         input_dim: 512
         output_dim: 2
 fusion:
-    pairwise_agg: 'max' 
+    pairwise_agg: 'min' 
     obj_features_question:
         type: block
         input_dims: [4800, 2048]
