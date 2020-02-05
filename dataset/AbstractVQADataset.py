@@ -193,22 +193,22 @@ class AbstractVQADataset(Dataset):
                 ans_to_aid.get(annotation_dict['most_frequent_answer'], len(annotation_dict))
         return split_set
 
-    def add_aid_weight_list(self, split_set, aid_to_ans):
+    def add_aid_weight_list(self, split_set, aid_to_ans, ans_to_aid):
         print('Adding weight list for id occurences..')
         annotations_list = split_set['annotations']
         for i in progressbar.progressbar(range(len(annotations_list))):
             annotation_dict = annotations_list[i]
             id_list = []
             for answer in annotation_dict['answers']:
-                if answer['answer_id'] in aid_to_ans:
-                    id_list.append(answer['answer_id'])
+                if answer['answer'] in ans_to_aid:
+                    id_list.append(ans_to_aid[answer['answer']])
             id_list.sort()
             counter = OrderedDict()
             for identifier in id_list:
                 counter[identifier] = counter.get(identifier, 0) + 1
-            id_unique = torch.LongTensor(list(counter.keys()))
             id_counts = np.array(list(counter.values()))
-            id_weights = torch.LongTensor(id_counts / np.sum(id_counts))
+            id_weights = torch.Tensor(id_counts / np.sum(id_counts))
+            id_unique = torch.LongTensor((list(counter.keys())))
             annotation_dict['id_list'] = id_list
             annotation_dict['id_unique'] = id_unique
             annotation_dict['id_weights'] = id_weights
@@ -261,7 +261,7 @@ class AbstractVQADataset(Dataset):
 
         train_set = self.remove_question_if_not_top_answer(train_set, ans_to_aid)
 
-        train_set = self.add_aid_weight_list(train_set, aid_to_ans)
+        train_set = self.add_aid_weight_list(train_set, aid_to_ans, ans_to_aid)
         # val_set = self.add_answer_list(val_set, aid_to_ans)
 
         train_set = self.replace_unknown_words_with_UNK(train_set, word_to_wid)
