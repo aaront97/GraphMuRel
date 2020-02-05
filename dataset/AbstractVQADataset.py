@@ -194,14 +194,15 @@ class AbstractVQADataset(Dataset):
         return split_set
 
     def add_aid_weight_list(self, split_set, aid_to_ans):
+        print('Adding weight list for id occurences..')
         annotations_list = split_set['annotations']
-        for annotation_dict in annotations_list:
+        for i in progressbar.progressbar(range(len(annotations_list))):
+            annotation_dict = annotations_list[i]
             id_list = []
             for answer in annotation_dict['answers']:
                 if answer['answer_id'] in aid_to_ans:
                     id_list.append(answer['answer_id'])
-            id_list.sort(key=lambda x: x[0])
-            id_list = [x[0] for x in id_list]
+            id_list.sort()
             counter = OrderedDict()
             for identifier in id_list:
                 counter[identifier] = counter.get(identifier, 0) + 1
