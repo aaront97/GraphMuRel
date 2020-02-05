@@ -66,8 +66,7 @@ class AttentionNet(nn.Module):
         batch_size = object_features_list.size(0)
         no_objects = object_features_list.size(1)
         q_expanded = question_self_attentioned.unsqueeze(1).expand(-1, no_objects, -1)
-        fused = self.attention_fusion
-        (
+        fused = self.attention_fusion(
                 [
                  q_expanded.contiguous().view(batch_size * no_objects, -1),
                  object_features_list.contiguous().view(batch_size * no_objects, -1)

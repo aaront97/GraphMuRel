@@ -6,8 +6,8 @@ skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
 vqa_dir: '/auto/homes/bat34/VQA'
 txt_enc: "BayesianUniSkip"
-pooling_agg: 'min'
-pairwise_agg: 'min' #Remember to change fusion's pairwise_agg too
+pooling_agg: 'max'
+pairwise_agg: 'max' #Remember to change fusion's pairwise_agg too
 batch_size: 256
 reduction_factor: 8
 grad_clip: 0.25
@@ -32,7 +32,7 @@ q_att:
         input_dim: 512
         output_dim: 2
 fusion:
-    pairwise_agg: 'min' 
+    pairwise_agg: 'max' 
     obj_features_question:
         type: block
         input_dims: [4800, 2048]
