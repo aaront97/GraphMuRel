@@ -2,51 +2,49 @@
 from dataset.AbstractVQADataset import AbstractVQADataset
 import torch
 import os
-from dataset.TextEncFactory import get_text_enc
 import transforms.transforms as transforms
-from skipthoughts import BayesianUniSkip
-import resource
+
 
 class MurelNetDataset(AbstractVQADataset):
-    def __init__(self, \
-              bottom_up_features_dir='', \
-              split='train', \
-              ROOT_DIR='/auto/homes/bat34/VQA_PartII/', \
-              txt_enc='BayesianUniSkip',\
-              collate_fn=None, \
-              processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits', \
-        	  model='murel',\
-        	  vqa_dir='/auto/homes/bat34/VQA',\
-        	  no_answers=3000,\
-        	  sample_answers=False,\
-        	  skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'\
-        ):
-        super(MurelNetDataset, self).__init__(\
-                 processed_dir=processed_dir, \
-                 model="murel", \
-                 vqa_dir=vqa_dir, \
-                 no_answers=no_answers, \
-                 sample_answers=sample_answers, \
-                 skipthoughts_dir=skipthoughts_dir, \
+    def __init__(self,
+                 bottom_up_features_dir='',
+                 split='train',
+                 ROOT_DIR='/auto/homes/bat34/VQA_PartII/',
+                 txt_enc='BayesianUniSkip',
+                 collate_fn=None,
+                 processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits',
+                 model='murel',
+                 vqa_dir='/auto/homes/bat34/VQA',
+                 no_answers=3000,
+                 sample_answers=False,
+                 skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'
+                 ):
+        super(MurelNetDataset, self).__init__(
+                 processed_dir=processed_dir,
+                 model="murel",
+                 vqa_dir=vqa_dir,
+                 no_answers=no_answers,
+                 sample_answers=sample_answers,
+                 skipthoughts_dir=skipthoughts_dir,
                  split=split)
 
-        self.collate_fn = transforms.Compose([ \
+        self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
-                transforms.PadQuestions(), \
-                transforms.StackTensors(), \
+                transforms.PadQuestions(),
+                transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
-        
+
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
-        
+
     def __len__(self):
         return len(self.dataset['questions'])
-    
+
     def __getitem__(self, idx):
         item = {}
         question = self.dataset['questions'][idx]
         item['index'] = idx
-        item['question_unique_id'] = question['question_id'] 
+        item['question_unique_id'] = question['question_id']
         item['question_ids'] = torch.LongTensor(question['question_ids'])
         item['question_lengths'] = torch.LongTensor([len(question['question_ids'])])
         item['image_name'] = question['image_name']
@@ -59,4 +57,9 @@ class MurelNetDataset(AbstractVQADataset):
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])
             item['answer'] = annotation['most_frequent_answer']
             item['question_type'] = annotation['question_type']
+        if self.split == 'train':
+            item['id_weights'] = annotation['id_weights']
+            item['id_unique'] = annotation['id_unique']
+        
+        
         return item

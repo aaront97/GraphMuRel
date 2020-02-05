@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from collections import Counter
+from collections import OrderedDict
 import os 
 import progressbar
 import json
@@ -10,15 +10,16 @@ import numpy as np
 
 
 class AbstractVQADataset(Dataset):
-    def __init__(self, \
-        processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits', \
-        model='baseline',\
-        vqa_dir='/auto/homes/bat34/VQA',\
-        no_answers=3000,\
-        sample_answers=False,\
-        skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts', 
-        split='train', \
-        exclude_unk_words=True):
+    def __init__(self,
+                 processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits',
+                 model='baseline',
+                 vqa_dir='/auto/homes/bat34/VQA',
+                 no_answers=3000,
+                 sample_answers=False,
+                 skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts', 
+                 split='train',
+                 exclude_unk_words=True):
+
         self.split = split
         self.no_answers = no_answers
         self.skipthoughts_dir = skipthoughts_dir
@@ -131,8 +132,8 @@ class AbstractVQADataset(Dataset):
             answer_str_probs = answer_str_occurences / np.sum(answer_str_occurences)
             annotation['most_frequent_answer'] = np.random.choice(answer_str_list, p=answer_str_probs)
         return split_set
-                
-                
+            
+            
     def add_images(self, split_set):
         for question in split_set['questions']:
             question['image_name'] = 'COCO_%s_%012d.jpg'%(split_set['data_subtype'],question['image_id'])
@@ -182,13 +183,36 @@ class AbstractVQADataset(Dataset):
     def val_encode_answers(self, split_set, ans_to_aid):
         annotations_list = split_set['annotations']
         for annotation_dict in annotations_list:
-            #For validation, since we are not guaranteed that we have seen the answer before,
-            #Set the answer id to something that cannot be predicted by the network.
+            """
+            # For validation, since we are not guaranteed 
+            # that we have seen the answer before,
+            # Set the answer id to something that cannot 
+            # be predicted by the network.
+            """
             annotation_dict['answer_id'] = \
                 ans_to_aid.get(annotation_dict['most_frequent_answer'], len(annotation_dict))
         return split_set
 
-
+    def add_aid_weight_list(self, split_set, aid_to_ans):
+        annotations_list = split_set['annotations']
+        for annotation_dict in annotations_list:
+            id_list = []
+            for answer in annotation_dict['answers']:
+                if answer['answer_id'] in aid_to_ans:
+                    id_list.append(answer['answer_id'])
+            id_list.sort(key=lambda x: x[0])
+            id_list = [x[0] for x in id_list]
+            counter = OrderedDict()
+            for identifier in id_list:
+                counter[identifier] = counter.get(identifier, 0) + 1
+            id_unique = torch.LongTensor(list(counter.keys()))
+            id_counts = np.array(list(counter.values()))
+            id_weights = torch.LongTensor(id_counts / np.sum(id_counts))
+            annotation_dict['id_list'] = id_list
+            annotation_dict['id_unique'] = id_unique
+            annotation_dict['id_weights'] = id_weights
+        return split_set                    
+                    
     def process(self):
         path_train_anno = os.path.join(self.vqa_dir, 'Annotations', 'v2_mscoco_train2014_annotations.json')
         path_val_anno = os.path.join(self.vqa_dir, 'Annotations', 'v2_mscoco_val2014_annotations.json')
@@ -219,14 +243,14 @@ class AbstractVQADataset(Dataset):
             train_set = self.add_sampled_answer(train_set)
             val_set = self.add_sampled_answer(val_set)
 
+
         train_set = self.tokenize_questions(train_set)
         val_set = self.tokenize_questions(val_set)
         test_set = self.tokenize_questions(test_set)
 
-        #We only deal with the top #no_answers
+        # We only deal with answers with the highest counts
         aid_to_ans = self.get_top_answers(train_set)
-        ans_to_aid = {word: index for index, word in enumerate(aid_to_ans)}
-        
+        ans_to_aid = {word: index for index, word in enumerate(aid_to_ans)} 
         if self.exclude_unk_words:
             known_words, _ = self.get_known_words(train_set)
         else:
@@ -235,6 +259,9 @@ class AbstractVQADataset(Dataset):
         word_to_wid = {word:idx for idx, word in enumerate(known_words)}
 
         train_set = self.remove_question_if_not_top_answer(train_set, ans_to_aid)
+
+        train_set = self.add_aid_weight_list(train_set, aid_to_ans)
+        # val_set = self.add_answer_list(val_set, aid_to_ans)
 
         train_set = self.replace_unknown_words_with_UNK(train_set, word_to_wid)
         val_set = self.replace_unknown_words_with_UNK(val_set, word_to_wid)
