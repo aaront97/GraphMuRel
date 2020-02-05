@@ -27,15 +27,21 @@ class MurelNetDataset(AbstractVQADataset):
                  sample_answers=sample_answers,
                  skipthoughts_dir=skipthoughts_dir,
                  split=split)
-
-        self.collate_fn = transforms.Compose([
+        self.bottom_up_features_dir = bottom_up_features_dir
+        self.split = split
+        if self.split == 'train':
+            self.collate_fn = transforms.Compose([
+                transforms.ConvertBatchListToDict(),
+                transforms.PadQuestions(),
+                transforms.Pad1DTensors(dict_keys=['id_unique', 'id_weights'])
+                transforms.StackTensors(),
+                ]) if collate_fn is None else collate_fn
+        else:
+            self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
                 transforms.PadQuestions(),
                 transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
-
-        self.bottom_up_features_dir = bottom_up_features_dir
-        self.split = split
 
     def __len__(self):
         return len(self.dataset['questions'])

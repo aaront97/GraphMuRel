@@ -30,6 +30,23 @@ class PadQuestions:
             return batch
 
 
+class Pad1DTensors:
+    def __init__(self, dict_keys):
+        self.dict_keys = dict_keys
+
+    def __call__(self, batch):
+        if isinstance(batch, collections.Mapping):
+            for key in self.dict_keys:
+                max_dim = max([list(x.size())[0] for x in batch[key]])
+                res = []
+                for item in batch[key]:
+                    padded = item.new_full((max_dim, ), 0)
+                    padded[:item.size(0)] = item
+                    res.append(padded)
+                batch[key] = res
+        return batch
+
+
 class ConvertBatchListToDict:
     def __init__(self):
         pass
@@ -54,14 +71,14 @@ class StackTensors:
                 batch[key] = torch.stack(batch[key])
         return batch
 
-        
+       
 class CreateBatchItem:
     def __init__(self):
         pass
-    
+  
     def __call__(self, batch):
         return self._createBatchItem(batch)
-    
+  
     def _createBatchItem(self, batch):
         out = {}
         for key, value in batch.items():
