@@ -17,7 +17,7 @@ class MurelNetDataset(AbstractVQADataset):
                  vqa_dir='/auto/homes/bat34/VQA',
                  no_answers=3000,
                  sample_answers=False,
-                 skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'
+                 skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'\
                  ):
         super(MurelNetDataset, self).__init__(
                  processed_dir=processed_dir,
@@ -33,7 +33,7 @@ class MurelNetDataset(AbstractVQADataset):
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
                 transforms.PadQuestions(),
-                transforms.Pad1DTensors(dict_keys=['id_unique', 'id_weights'])
+                transforms.Pad1DTensors(dict_keys=['id_unique', 'id_weights']),
                 transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
         else:

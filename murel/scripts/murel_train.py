@@ -1,4 +1,5 @@
 import torch
+import random
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import os
@@ -9,6 +10,10 @@ from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
 from schedulers.schedulers import LR_List_Scheduler
+from loss_functions.loss_functions import soft_cross_entropy
+from evaluation.eval_vqa import VQA_Evaluator
+import json
+import numpy as np
 
 
 def create_summary_writer(model, loader, logdir):
@@ -29,14 +34,11 @@ def get_model_directory(config, chosen_keys):
     return res
 
 
-def val_evaluate(model, epoch, val_loader, writer, criterion):
+def val_evaluate(model, epoch, val_loader, writer, evaluator, aid_to_ans, RESULTS_FILE_PATH):
     model.eval()
-    correct = 0
-    total = 0
-    running_loss = 0.0
-    count = 1
-    evaluator_criterion = nn.NLLLoss(reduction='sum')
+    print('Running model on validation dataset..')
     with torch.no_grad():
+        results = []
         for data in tqdm.tqdm(val_loader):
             item = {
                     'question_ids': data['question_ids'].cuda(),
@@ -45,20 +47,28 @@ def val_evaluate(model, epoch, val_loader, writer, criterion):
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
                     'question_lengths': data['question_lengths'].cuda(),
             }
-            inputs, labels = item, item['answer_id']
+            inputs = item
+            qids = data['question_unique_id']
             outputs = model(inputs)
-            _, predicted = torch.max(outputs, dim=1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-            running_loss += evaluator_criterion(outputs, labels).item()
-            count += 1
-    avg_accuracy = correct / total
-    avg_cross_entropy = running_loss / total
-    print("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-              .format(epoch, avg_accuracy, avg_cross_entropy))
-    writer.add_scalar("validation/avg_loss", avg_cross_entropy, epoch)
-    writer.add_scalar("validation/avg_accuracy", avg_accuracy, epoch)
-    return avg_accuracy
+            values, ans_indices = torch.max(outputs, dim=1)
+            ans_indices = list(ans_indices)
+            ans_indices = [tsr.item() for tsr in ans_indices]
+            for qid, ans_idx in zip(qids, ans_indices):
+                results.append({
+                    'question_id': int(qid),
+                    'answer': aid_to_ans[ans_idx]
+                })
+    print('Finished evaluating the model on the val dataset.')
+    print('Saving results to %s' % RESULTS_FILE_PATH)
+    with open(RESULTS_FILE_PATH, 'w') as f:
+        json.dump(results, f)
+    print('Done saving to %s' % RESULTS_FILE_PATH)
+    print('Calling VQA evaluation subroutine')
+    # We let the evaluator do all the tensorboard logging.
+    accuracy = evaluator.evaluate(RESULTS_FILE_PATH, epoch)
+    print("Validation Results - Epoch: {}  Overall  accuracy: {:.2f}".format(epoch, accuracy))
+    # writer.add_scalar("validation/overall_accuracy", accuracy, epoch)
+    return accuracy
 
 
 def train_evaluate(model, epoch, train_loader, writer, criterion):
@@ -150,13 +160,20 @@ def get_dirs(config, include_keys=[]):
     res['best_model_file_name'] = best_model_file_name
     return res
 
+def set_seed(seed):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 # Fix dirs
 def run():
     with open('murel.yaml') as f:
         config = yaml.load(f)
+    set_seed(config['seed'])
     ROOT_DIR = config['ROOT_DIR']
-    names = get_dirs(config, include_keys=[
+    RESULTS_FILE_PATH = config['RESULTS_FILE_PATH']
+    names = get_dirs(config, include_keys=['seed',
+                                       'loss_function',
                                        'txt_enc',
                                        'pooling_agg',
                                        'pairwise_agg',
@@ -167,6 +184,9 @@ def run():
                                        'fusion_type'])
 
     writer = SummaryWriter(logdir=names['log_dir'])
+    evaluator = VQA_Evaluator(summary_writer=writer)
+    if torch.cuda.is_available():
+        torch.backends.cudnn.benchmark = True
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('CUDA AVAILABILITY: {}, Device used: {}'
           .format(torch.cuda.is_available(), device))
@@ -240,7 +260,12 @@ def run():
 
     print('Starting training from EPOCH {}'.format(start_epoch))
     lr_scheduler = LR_List_Scheduler(config)
-    criterion = nn.NLLLoss()
+    if config['loss_function'] == 'NLLLoss':
+        criterion = nn.NLLLoss()
+    elif config['loss_function'] == 'soft_cross_entropy':
+        criterion = soft_cross_entropy
+    else:
+        raise ValueError('Invalid loss function entered!')
 
     global_iteration = 0
     for epoch in tqdm.tqdm(range(start_epoch, config['epochs'])):
@@ -251,9 +276,12 @@ def run():
         lr_scheduler.update_lr(optimizer, epoch)
         print('Current learning rate {}'.format(optimizer.param_groups[0]['lr']))
         optimizer.zero_grad()
+        batch_counter = 0
+        total_batch_loss = 0
         for data in pbar:
             global_iteration += 1
             local_iteration += 1
+            batch_counter += 1
             pbar.set_description("Epoch[{}] Iteration[{}/{}]".format(epoch,
                                  local_iteration, len(train_loader)))
             item = {
@@ -261,7 +289,9 @@ def run():
                     'object_features_list': data['object_features_list'].cuda(),
                     'bounding_boxes': data['bounding_boxes'].cuda(),
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
-                    'question_lengths': data['question_lengths'].cuda()
+                    'question_lengths': data['question_lengths'].cuda(),
+                    'id_unique': data['id_unique'].cuda(),
+                    'id_weights': data['id_weights'].cuda()
             }
 
 #             optimizer.zero_grad()
@@ -274,7 +304,12 @@ def run():
 
             inputs, labels = item, item['answer_id']
             outputs = model(inputs)
-            loss = criterion(outputs, labels) / reduction_factor
+            if config['loss_function'] == 'NLLLoss':
+                loss = criterion(outputs, labels)
+            else:
+                loss = criterion(outputs, item['id_unique'], item['id_weights'])
+            total_batch_loss += loss.item()
+            loss = loss / reduction_factor
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(),
                                            config['grad_clip'])
@@ -294,12 +329,20 @@ def run():
         # At the end of every epoch, 
         # run it on the validation and training dataset
         # train_evaluate(model, epoch, train_loader, writer, criterion)
-        accuracy = val_evaluate(model, epoch, val_loader, writer, criterion)
+        average_batch_loss = total_batch_loss / batch_counter
+        print('Training Results: Epoch {} Average Epoch Loss: {:.2f}'.format(epoch, average_batch_loss))
+        writer.add_scalar("training/average_epoch_loss", average_batch_loss, epoch)
+        accuracy = val_evaluate(model, epoch, val_loader, writer, evaluator, train_dataset.aid_to_ans, RESULTS_FILE_PATH)
 
         isBest = False
         if accuracy > max_accuracy:
+            print('Validation accuracy at epoch {} is higher than the max validation accuracy!'.format(epoch))
+            print('')
+            print('Updating max_accuracy...')
             max_accuracy = accuracy
             isBest = True
+        else:
+            print('Validation accuracy in epoch {} is lower than the max validation accuracy'.format(epoch))
 
         state = {
             'model': model.state_dict(),
@@ -316,7 +359,8 @@ def run():
             'accuracy': accuracy,
             'config': config,
         }
-
+        print('')
+        print('Checkpointing model..')
         if ((epoch + 1) % config['checkpoint_every']) == 0 or isBest:
             save_checkpoint(state, info)
 

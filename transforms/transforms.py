@@ -37,7 +37,7 @@ class Pad1DTensors:
     def __call__(self, batch):
         if isinstance(batch, collections.Mapping):
             for key in self.dict_keys:
-                max_dim = max([list(x.size())[0] for x in batch[key]])
+                max_dim = max([x.size(0) for x in batch[key]])
                 res = []
                 for item in batch[key]:
                     padded = item.new_full((max_dim, ), 0)
@@ -60,7 +60,6 @@ class ConvertBatchListToDict:
         else:
             return batch
 
-  
 class StackTensors:
     def __init__(self):
         pass

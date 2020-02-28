@@ -16,7 +16,7 @@ def soft_cross_entropy(x, correct_indices, weight_indices, reduce='mean'):
         https://ilija139.github.io/pub/cvpr2017_vqa.pdf
     """
     x = x.gather(1, correct_indices)
-    x = x * weights
-    x = x.sum(dim=1)
-    x = torch.mean(x)
-    return x
+    x = x * weight_indices
+    x = torch.sum(x, dim=1)
+    x = x.mean()
+    return -x
