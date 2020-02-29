@@ -1,4 +1,4 @@
-import torch_geometric.transfroms as T
+import torch_geometric.transforms as T
 from torch_geometric.data import Data
 
 
