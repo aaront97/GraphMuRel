@@ -3,8 +3,10 @@ import torch
 import torch.nn as nn
 from fusion_net.factory.factory_fusion import factory_fusion
 from murel.models.MurelCell import MurelCell
+from murel.models.GraphCell import GraphCell
 from dataset.TextEncFactory import get_text_enc
 from dataset.auxiliary_functions import masked_softmax, get_aggregation_func
+
 
 class MurelNet(nn.Module):
     def __init__(self, config, word_vocabulary):
@@ -19,12 +21,21 @@ class MurelNet(nn.Module):
         self.linear1 = nn.Linear(config['q_att']['linear1']['input_dim'],
                                  config['q_att']['linear1']['output_dim'])
         self.pooling_agg = get_aggregation_func(config['pooling_agg'], dim=1)
+        self.include_graph_module = config['include_graph_module']
+
+        if self.include_graph_module:
+            self.graph_module = GraphCell(config['graph']['input_dim'],
+                                          config['graph']['output_dim'])
+            self.graph_fusion = factory_fusion(
+                    config['fusion']['graph_fusion'])
 
     def forward(self, item):
         question_ids = item['question_ids']
         object_features_list = item['object_features_list']
         bounding_boxes = item['bounding_boxes']
         question_lengths = item['question_lengths']
+        graph_batch = item['graph_batch']
+
 
         # q_att
         question_each_word_embedding = self.txt_enc.embedding(question_ids)
@@ -77,8 +88,9 @@ class MurelNet(nn.Module):
                                     batch_size,
                                     num_obj)
         pool = self.pooling_agg(object_features_list)
-        # Sensitive?
-        # scores = self.final_fusion([max_pool, question_attentioned])
+        if self.include_graph_module:
+            graph_res = self.graph_module(graph_batch)
+            pool = self.graph_fusion(pool, graph_res)
         scores = self.final_fusion([question_attentioned, pool])
         prob = self.log_softmax(scores)
         return prob

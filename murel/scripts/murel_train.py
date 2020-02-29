@@ -173,15 +173,15 @@ def run():
     ROOT_DIR = config['ROOT_DIR']
     RESULTS_FILE_PATH = config['RESULTS_FILE_PATH']
     names = get_dirs(config, include_keys=['seed',
-                                       'loss_function',
-                                       'txt_enc',
-                                       'pooling_agg',
-                                       'pairwise_agg',
-                                       'batch_size',
-                                       'lr',
-                                       'lr_decay_rate',
-                                       'unroll_steps',
-                                       'fusion_type'])
+                                           'loss_function',
+                                           'txt_enc',
+                                           'pooling_agg',
+                                           'pairwise_agg',
+                                           'batch_size',
+                                           'lr',
+                                           'lr_decay_rate',
+                                           'unroll_steps',
+                                           'fusion_type'])
 
     writer = SummaryWriter(logdir=names['log_dir'])
     evaluator = VQA_Evaluator(summary_writer=writer)

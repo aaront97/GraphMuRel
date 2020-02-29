@@ -3,7 +3,7 @@ from dataset.AbstractVQADataset import AbstractVQADataset
 import torch
 import os
 import transforms.transforms as transforms
-
+from murel.models.GraphConstructor import GraphConstructor
 
 class MurelNetDataset(AbstractVQADataset):
     def __init__(self,
@@ -17,7 +17,9 @@ class MurelNetDataset(AbstractVQADataset):
                  vqa_dir='/auto/homes/bat34/VQA',
                  no_answers=3000,
                  sample_answers=False,
-                 skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts'\
+                 skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts',
+                 include_graph_data=True,
+                 graph_type='knn'
                  ):
         super(MurelNetDataset, self).__init__(
                  processed_dir=processed_dir,
@@ -29,18 +31,23 @@ class MurelNetDataset(AbstractVQADataset):
                  split=split)
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
+        self.include_graph_data = include_graph_data
+        self.graph_constructor = GraphConstructor(graph_type)
+
         if self.split == 'train':
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
                 transforms.PadQuestions(),
                 transforms.Pad1DTensors(dict_keys=['id_unique', 'id_weights']),
                 transforms.StackTensors(),
+                transforms.BatchGraph()
                 ]) if collate_fn is None else collate_fn
         else:
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
                 transforms.PadQuestions(),
                 transforms.StackTensors(),
+                transforms.BatchGraph()
                 ]) if collate_fn is None else collate_fn
 
     def __len__(self):
@@ -58,6 +65,9 @@ class MurelNetDataset(AbstractVQADataset):
         dict_features = torch.load(os.path.join(self.bottom_up_features_dir, image_name ) + '.pth')
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
+        if self.graph_constructor:
+            item['graph'] = self.graph_constructor.construct_graph(dict_features['norm_rois'],
+                                                                   dict_features['pooled_feat'])
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])
@@ -66,6 +76,4 @@ class MurelNetDataset(AbstractVQADataset):
         if self.split == 'train':
             item['id_weights'] = annotation['id_weights']
             item['id_unique'] = annotation['id_unique']
-        
-        
         return item

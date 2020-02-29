@@ -1,5 +1,6 @@
 import torch
 import collections
+from torch_geometric.data import Batch
 
 
 class Compose:
@@ -10,6 +11,16 @@ class Compose:
         for trfm in self.transform_list:
             batch = trfm(batch)
         return batch
+
+
+class BatchGraph:
+    def __init__(self):
+        pass
+
+    def __call__(self, batch):
+        if isinstance(batch, collections.Mapping):
+            if 'graph' in batch:
+                batch['graph'] = Batch.from_data_list(batch['graph'])
 
 
 class PadQuestions:
@@ -50,7 +61,7 @@ class Pad1DTensors:
 class ConvertBatchListToDict:
     def __init__(self):
         pass
-    
+
     def __call__(self, batch):
         return self.convertBLtoD(batch)
 
@@ -59,6 +70,7 @@ class ConvertBatchListToDict:
             return {key: [d[key] for d in batch] for key in batch[0]}
         else:
             return batch
+
 
 class StackTensors:
     def __init__(self):
@@ -70,14 +82,14 @@ class StackTensors:
                 batch[key] = torch.stack(batch[key])
         return batch
 
-       
+ 
 class CreateBatchItem:
     def __init__(self):
         pass
-  
+
     def __call__(self, batch):
         return self._createBatchItem(batch)
-  
+
     def _createBatchItem(self, batch):
         out = {}
         for key, value in batch.items():
