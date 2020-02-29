@@ -293,14 +293,10 @@ def run():
                     'id_unique': data['id_unique'].cuda(),
                     'id_weights': data['id_weights'].cuda()
             }
+            
+            if config['include_graph_module']:
+                item['graph_batch'] = data['graph'].cuda()
 
-#             optimizer.zero_grad()
-#             inputs, labels = item, item['answer_id']
-#             outputs = model(inputs)
-#             loss = criterion(outputs,labels)
-#             loss.backward()
-#             optimizer.step()
-#             running_loss += loss.item()
 
             inputs, labels = item, item['answer_id']
             outputs = model(inputs)

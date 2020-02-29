@@ -39,15 +39,15 @@ class MurelNetDataset(AbstractVQADataset):
                 transforms.ConvertBatchListToDict(),
                 transforms.PadQuestions(),
                 transforms.Pad1DTensors(dict_keys=['id_unique', 'id_weights']),
-                transforms.StackTensors(),
                 transforms.BatchGraph()
+                transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
         else:
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
                 transforms.PadQuestions(),
-                transforms.StackTensors(),
                 transforms.BatchGraph()
+                transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
 
     def __len__(self):
