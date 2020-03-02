@@ -34,7 +34,7 @@ def get_model_directory(config, chosen_keys):
     return res
 
 
-def val_evaluate(model, epoch, val_loader, writer, evaluator, aid_to_ans, RESULTS_FILE_PATH):
+def val_evaluate(model, epoch, val_loader, writer, evaluator, aid_to_ans, RESULTS_FILE_PATH, device):
     model.eval()
     print('Running model on validation dataset..')
     with torch.no_grad():
@@ -47,6 +47,7 @@ def val_evaluate(model, epoch, val_loader, writer, evaluator, aid_to_ans, RESULT
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
                     'question_lengths': data['question_lengths'].cuda(),
             }
+            item['graph_batch'] = data['graph'].to(device)
             inputs = item
             qids = data['question_unique_id']
             outputs = model(inputs)
@@ -295,7 +296,7 @@ def run():
             }
             
             if config['include_graph_module']:
-                item['graph_batch'] = data['graph'].cuda()
+                item['graph_batch'] = data['graph'].to(device)
 
 
             inputs, labels = item, item['answer_id']
@@ -328,7 +329,7 @@ def run():
         average_batch_loss = total_batch_loss / batch_counter
         print('Training Results: Epoch {} Average Epoch Loss: {:.2f}'.format(epoch, average_batch_loss))
         writer.add_scalar("training/average_epoch_loss", average_batch_loss, epoch)
-        accuracy = val_evaluate(model, epoch, val_loader, writer, evaluator, train_dataset.aid_to_ans, RESULTS_FILE_PATH)
+        accuracy = val_evaluate(model, epoch, val_loader, writer, evaluator, train_dataset.aid_to_ans, RESULTS_FILE_PATH, device)
 
         isBest = False
         if accuracy > max_accuracy:

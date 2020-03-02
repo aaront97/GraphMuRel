@@ -21,7 +21,7 @@ class BatchGraph:
         if isinstance(batch, collections.Mapping):
             if 'graph' in batch:
                 batch['graph'] = Batch.from_data_list(batch['graph'])
-
+        return batch
 
 class PadQuestions:
     def __init__(self):

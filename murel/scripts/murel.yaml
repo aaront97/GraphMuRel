@@ -1,5 +1,5 @@
 name: murel_graph_knn_NLLLoss
-checkpoint_option: fresh  #can be 'best' or 'fresh' or 'resume_last'
+checkpoint_option: resume_last  #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
@@ -28,7 +28,7 @@ fusion_type: block
 include_graph_module: True
 graph:
     input_dim: 2048
-    output_dim: 3000
+    output_dim: 2048
 q_att:
     linear0:
         input_dim: 2400
@@ -78,8 +78,8 @@ fusion:
         type: block
         input_dims: [4800, 2048]
         output_dims: 3000
-        dropout_prelin: 0.
-        dropout_input: 0.1
+        dropout_prelin: 0.1
+        dropout_input: 0.
         chunks: 20
         rank: 10
         mm_dim: 1600

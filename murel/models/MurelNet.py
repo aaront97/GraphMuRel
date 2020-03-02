@@ -90,7 +90,7 @@ class MurelNet(nn.Module):
         pool = self.pooling_agg(object_features_list)
         if self.include_graph_module:
             graph_res = self.graph_module(graph_batch)
-            pool = self.graph_fusion(pool, graph_res)
+            pool = self.graph_fusion([pool, graph_res])
         scores = self.final_fusion([question_attentioned, pool])
         prob = self.log_softmax(scores)
         return prob
