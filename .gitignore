@@ -8,3 +8,4 @@ murel/trained_models
 murel/old_pretrained_models
 baseline/*.json
 murel/*.json
+tests/test_graphs/
