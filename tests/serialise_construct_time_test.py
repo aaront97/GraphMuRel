@@ -26,7 +26,7 @@ def save_graphs(feat_dir, images_list, graph_files_dir):
         name = images_list[i]
         feat_path = os.path.join(feat_dir, name)
         dict_feats = torch.load(feat_path)
-        data = Data(x=dict_feats['pooled_feat'], pos=dict_feats['norm_rois'])
+        data = Data(pos=dict_feats['norm_rois'])
         data = constructor(data)
         torch.save(data, os.path.join(graph_files_dir, name))
 
@@ -56,7 +56,7 @@ def main():
     print('Constructing graphs took an average of: {} s per graph'.format(t / no_images))
     t = timeit.timeit('save_graphs(feat_dir, images_list, graph_files_dir)', 
                       'from __main__ import save_graphs, feat_dir, images_list, graph_files_dir', number=1)
-    print('Saving graphs took: {} s'.format(t))
+    print('Saving graphs took an average of: {} s per graph'.format(t))
     t = timeit.timeit('load_graphs(feat_dir, images_list, graph_files_dir)',
                       'from __main__ import load_graphs, feat_dir, images_list, graph_files_dir', number=1)
     print('Loading graphs took an average of: {} s per graph'.format(t / no_images))
