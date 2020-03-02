@@ -32,7 +32,9 @@ class MurelNetDataset(AbstractVQADataset):
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
         self.include_graph_data = include_graph_data
-        self.graph_constructor = GraphConstructor(graph_type)
+        if graph_type == 'knn':
+            self.graph_dir = '/auto/homes/bat34/VQA_PartII/' + \
+                             'data/preprocessed_graphs_knn/'
 
         if self.split == 'train':
             self.collate_fn = transforms.Compose([
@@ -59,15 +61,17 @@ class MurelNetDataset(AbstractVQADataset):
         item['index'] = idx
         item['question_unique_id'] = question['question_id']
         item['question_ids'] = torch.LongTensor(question['question_ids'])
-        item['question_lengths'] = torch.LongTensor([len(question['question_ids'])])
+        item['question_lengths'] = torch.LongTensor(
+                [len(question['question_ids'])])
         item['image_name'] = question['image_name']
         image_name = question['image_name']
-        dict_features = torch.load(os.path.join(self.bottom_up_features_dir, image_name ) + '.pth')
+        dict_features = torch.load(
+                os.path.join(self.bottom_up_features_dir, image_name) + '.pth')
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
         if self.graph_constructor:
-            item['graph'] = self.graph_constructor.construct_graph(dict_features['norm_rois'],
-                                                                   dict_features['pooled_feat'])
+            graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
+            item['graph'] = torch.load(graph_img_name)
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])

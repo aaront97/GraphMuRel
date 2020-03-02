@@ -11,6 +11,7 @@ class MurelCell(nn.Module):
         fusion_features_cfg = config['obj_features_question']
         fusion_box_cfg = config['box']
         fusion_fused_cfg = config['obj_features_obj_features']
+
         self.fusion_features = factory_fusion(fusion_features_cfg)
         self.fusion_box = factory_fusion(fusion_box_cfg)
         self.fusion_fused = factory_fusion(fusion_fused_cfg)

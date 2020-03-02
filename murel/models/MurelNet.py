@@ -11,7 +11,16 @@ from dataset.auxiliary_functions import masked_softmax, get_aggregation_func
 class MurelNet(nn.Module):
     def __init__(self, config, word_vocabulary):
         super(MurelNet, self).__init__()
-        self.murel_cell = MurelCell(config['fusion'])
+        self.use_pairwise = config['use_pairwise']
+        self.use_graph_module = config['use_graph_module']
+
+        if config['use_pairwise']:
+            self.murel_cell = MurelCell(config['fusion'])
+        if config['use_graph_module']:
+            self.graph_module = GraphCell(config['graph']['input_dim'],
+                                          config['graph']['output_dim'],
+                                          config['fusion'])
+
         self.final_fusion = factory_fusion(config['fusion']['final_fusion'])
         self.unroll_steps = config['unroll_steps']
         self.log_softmax = nn.LogSoftmax(dim=1)
@@ -21,13 +30,7 @@ class MurelNet(nn.Module):
         self.linear1 = nn.Linear(config['q_att']['linear1']['input_dim'],
                                  config['q_att']['linear1']['output_dim'])
         self.pooling_agg = get_aggregation_func(config['pooling_agg'], dim=1)
-        self.include_graph_module = config['include_graph_module']
 
-        if self.include_graph_module:
-            self.graph_module = GraphCell(config['graph']['input_dim'],
-                                          config['graph']['output_dim'])
-            self.graph_fusion = factory_fusion(
-                    config['fusion']['graph_fusion'])
 
     def forward(self, item):
         question_ids = item['question_ids']
@@ -35,7 +38,6 @@ class MurelNet(nn.Module):
         bounding_boxes = item['bounding_boxes']
         question_lengths = item['question_lengths']
         graph_batch = item['graph_batch']
-
 
         # q_att
         question_each_word_embedding = self.txt_enc.embedding(question_ids)
@@ -63,10 +65,6 @@ class MurelNet(nn.Module):
             attentioned_glimpses.append(attentioned_feature)
         question_attentioned = torch.cat(attentioned_glimpses, dim=1)
 
-        if len(list(object_features_list.size())) != 3:
-            raise ValueError(
-                    'Expecting Object Features Input' +
-                    'of BATCH_SIZE x NUM_OBJ x 2048')
 
         batch_size, num_obj, _ = list(object_features_list.size())
         # Resize question outside for loop as
@@ -80,17 +78,25 @@ class MurelNet(nn.Module):
         question_attentioned_repeated = question_attentioned_repeated.view(
                 batch_size * num_obj, -1)
 
-        for i in range(self.unroll_steps):
-            object_features_list = self.murel_cell(
-                                    question_attentioned_repeated,
-                                    object_features_list,
-                                    bounding_boxes,
-                                    batch_size,
-                                    num_obj)
-        pool = self.pooling_agg(object_features_list)
-        if self.include_graph_module:
-            graph_res = self.graph_module(graph_batch)
-            pool = self.graph_fusion([pool, graph_res])
+        if self.use_pairwise:
+            for i in range(self.unroll_steps):
+                object_features_list = self.murel_cell(
+                                        question_attentioned_repeated,
+                                        object_features_list,
+                                        bounding_boxes,
+                                        batch_size,
+                                        num_obj)
+            pool = self.pooling_agg(object_features_list)
+
+        if self.use_graph_module:
+            object_features_list = self.graph_module(
+                                        question_attentioned_repeated,
+                                        object_features_list,
+                                        bounding_boxes,
+                                        batch_size,
+                                        num_obj,
+                                        graph_batch)
+
         scores = self.final_fusion([question_attentioned, pool])
         prob = self.log_softmax(scores)
         return prob
