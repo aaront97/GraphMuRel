@@ -89,13 +89,14 @@ class MurelNet(nn.Module):
             pool = self.pooling_agg(object_features_list)
 
         if self.use_graph_module:
-            object_features_list = self.graph_module(
-                                        question_attentioned_repeated,
-                                        object_features_list,
-                                        bounding_boxes,
-                                        batch_size,
-                                        num_obj,
-                                        graph_batch)
+            for i in range(self.unroll_steps):
+                object_features_list = self.graph_module(
+                                            question_attentioned_repeated,
+                                            object_features_list,
+                                            bounding_boxes,
+                                            batch_size,
+                                            num_obj,
+                                            graph_batch)
             pool = object_features_list
         scores = self.final_fusion([question_attentioned, pool])
         prob = self.log_softmax(scores)

@@ -24,8 +24,8 @@ class GraphCell(nn.Module):
         fusion_features_cfg = config['obj_features_question']
         self.fusion_features = factory_fusion(fusion_features_cfg)
         self.gcn1 = GCNConv(in_channels, in_channels)
-        self.gcn2 = GCNConv(in_channels, in_channels)
-        self.gcn3 = GCNConv(in_channels, out_channels)
+#        self.gcn2 = GCNConv(in_channels, in_channels)
+#        self.gcn3 = GCNConv(in_channels, out_channels)
 
     def forward(self,
                 question_embedding,
@@ -46,9 +46,9 @@ class GraphCell(nn.Module):
         x = fused_question_object
         edge_index, batch = data.edge_index, data.batch
         x = self.gcn1(x, edge_index)
-        x = F.relu(x)
-        x = self.gcn2(x, edge_index)
-        x = F.relu(x)
-        x = self.gcn3(x, edge_index)
+#        x = F.relu(x)
+#        x = self.gcn2(x, edge_index)
+#        x = F.relu(x)
+#        x = self.gcn3(x, edge_index)
         x = global_max_pool(x, batch)
         return x

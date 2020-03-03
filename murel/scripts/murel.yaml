@@ -1,4 +1,4 @@
-name: murel_GCN_knn_NLLLoss
+name: murel_GCN1_knn_unroll_NLLLoss
 checkpoint_option: fresh #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
