@@ -6,6 +6,7 @@ from murel.models.MurelCell import MurelCell
 from murel.models.GraphCell import GraphCell
 from dataset.TextEncFactory import get_text_enc
 from dataset.auxiliary_functions import masked_softmax, get_aggregation_func
+from torch_geometric.nn import global_max_pool
 
 
 class MurelNet(nn.Module):
@@ -89,6 +90,8 @@ class MurelNet(nn.Module):
             pool = self.pooling_agg(object_features_list)
 
         if self.use_graph_module:
+            object_features_list = object_features_list.contiguous()
+            object_features_list = object_features_list.view(batch_size * num_obj, -1)
             for i in range(self.unroll_steps):
                 object_features_list = self.graph_module(
                                             question_attentioned_repeated,
@@ -97,7 +100,7 @@ class MurelNet(nn.Module):
                                             batch_size,
                                             num_obj,
                                             graph_batch)
-            pool = object_features_list
+            pool = global_max_pool(object_features_list, graph_batch.batch)
         scores = self.final_fusion([question_attentioned, pool])
         prob = self.log_softmax(scores)
         return prob
