@@ -295,7 +295,7 @@ def run():
                     'id_weights': data['id_weights'].cuda()
             }
             
-            if config['include_graph_module']:
+            if config['use_graph_module']:
                 item['graph_batch'] = data['graph'].to(device)
 
 

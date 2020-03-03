@@ -19,7 +19,7 @@ lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 epochs: 25
 checkpoint_every: 1
-num_workers: 4
+num_workers: 12
 load_last_epoch: True
 unroll_steps: 3
 log_every: 50

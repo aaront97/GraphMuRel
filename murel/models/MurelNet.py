@@ -96,7 +96,7 @@ class MurelNet(nn.Module):
                                         batch_size,
                                         num_obj,
                                         graph_batch)
-
+            pool = object_features_list
         scores = self.final_fusion([question_attentioned, pool])
         prob = self.log_softmax(scores)
         return prob

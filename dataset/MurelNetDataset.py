@@ -69,7 +69,7 @@ class MurelNetDataset(AbstractVQADataset):
                 os.path.join(self.bottom_up_features_dir, image_name) + '.pth')
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
-        if self.graph_constructor:
+        if self.graph_dir:
             graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
             item['graph'] = torch.load(graph_img_name)
         if self.split != 'test':
