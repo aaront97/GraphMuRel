@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import os
 import yaml
-from dataset.MurelNetDataset import MurelNetDataset
+from dataset.VQAv2Dataset import VQAv2Dataset
 from baseline.models.AttentionNet import AttentionNet
 from tensorboardX import SummaryWriter
 import tqdm
@@ -160,7 +160,7 @@ def run():
     print('CUDA AVAILABILITY: {}, Device used: {}'
           .format(torch.cuda.is_available(), device))
 
-    train_dataset = MurelNetDataset(
+    train_dataset = VQAv2Dataset(
             split="train",
             txt_enc=config['txt_enc'],
             bottom_up_features_dir=config['bottom_up_features_dir'],
@@ -168,7 +168,7 @@ def run():
             processed_dir=config['processed_dir'],
             ROOT_DIR=ROOT_DIR,
             vqa_dir=config['vqa_dir'])
-    val_dataset = MurelNetDataset(
+    val_dataset = VQAv2Dataset(
             split="val",
             txt_enc=config['txt_enc'],
             bottom_up_features_dir=config['bottom_up_features_dir'],

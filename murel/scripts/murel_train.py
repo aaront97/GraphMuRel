@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import os
 import yaml
-from dataset.MurelNetDataset import MurelNetDataset
+from dataset.VQAv2Dataset import VQAv2Dataset
 from murel.models.MurelNet import MurelNet
 from tensorboardX import SummaryWriter
 import tqdm
@@ -34,11 +34,15 @@ def get_model_directory(config, chosen_keys):
     return res
 
 
-def val_evaluate(model, epoch, val_loader, writer, evaluator, aid_to_ans, RESULTS_FILE_PATH, device):
+def val_evaluate(config, model, epoch, val_loader,
+                 writer, evaluator, aid_to_ans,
+                 RESULTS_FILE_PATH, device, criterion):
     model.eval()
     print('Running model on validation dataset..')
     with torch.no_grad():
         results = []
+        total_batch_loss = 0
+        batch_iter = 0
         for data in tqdm.tqdm(val_loader):
             item = {
                     'question_ids': data['question_ids'].cuda(),
@@ -46,11 +50,24 @@ def val_evaluate(model, epoch, val_loader, writer, evaluator, aid_to_ans, RESULT
                     'bounding_boxes': data['bounding_boxes'].cuda(),
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
                     'question_lengths': data['question_lengths'].cuda(),
+                    'id_unique': data['id_unique'].cuda(),
+                    'id_weights': data['id_weights'].cuda()
             }
-            item['graph_batch'] = data['graph'].to(device)
+            
+            if config['use_graph_module']:
+                item['graph_batch'] = data['graph'].to(device)
+
             inputs = item
             qids = data['question_unique_id']
             outputs = model(inputs)
+            labels = item['answer_id']
+            if config['loss_function'] == 'NLLLoss':
+                loss = criterion(outputs, labels)
+            else:
+                loss = criterion(outputs, item['id_unique'], item['id_weights'])
+
+            total_batch_loss += loss.item()
+
             values, ans_indices = torch.max(outputs, dim=1)
             ans_indices = list(ans_indices)
             ans_indices = [tsr.item() for tsr in ans_indices]
@@ -59,17 +76,20 @@ def val_evaluate(model, epoch, val_loader, writer, evaluator, aid_to_ans, RESULT
                     'question_id': int(qid),
                     'answer': aid_to_ans[ans_idx]
                 })
+            batch_iter += 1
+    total_batch_loss = total_batch_loss / batch_iter
+        
     print('Finished evaluating the model on the val dataset.')
     print('Saving results to %s' % RESULTS_FILE_PATH)
     with open(RESULTS_FILE_PATH, 'w') as f:
         json.dump(results, f)
     print('Done saving to %s' % RESULTS_FILE_PATH)
     print('Calling VQA evaluation subroutine')
-    # We let the evaluator do all the tensorboard logging.
+    # We let the evaluator do all the tensorboard logging for accuracy
     accuracy = evaluator.evaluate(RESULTS_FILE_PATH, epoch)
     print("Validation Results - Epoch: {}  Overall  accuracy: {:.2f}".format(epoch, accuracy))
     # writer.add_scalar("validation/overall_accuracy", accuracy, epoch)
-    return accuracy
+    return accuracy, total_batch_loss
 
 
 def train_evaluate(model, epoch, train_loader, writer, criterion):
@@ -118,7 +138,9 @@ def load_checkpoint(file_name, model, optimizer):
     state = torch.load(file_name)
     model.load_state_dict(state['model'])
     optimizer.load_state_dict(state['optimizer'])
-    return model, optimizer, state['epoch']
+    epoch = state['epoch']
+    epoch_since_best = state['epoch_since_best']
+    return model, optimizer, epoch, epoch_since_best
 
 def get_max_accuracy(checkpoint_file_name, best_model_file_name):
     res = -1
@@ -192,7 +214,7 @@ def run():
     print('CUDA AVAILABILITY: {}, Device used: {}'
           .format(torch.cuda.is_available(), device))
     
-    train_dataset = MurelNetDataset(
+    train_dataset = VQAv2Dataset(
             split="train",
             txt_enc=config['txt_enc'],
             bottom_up_features_dir=config['bottom_up_features_dir'],
@@ -200,7 +222,7 @@ def run():
             processed_dir=config['processed_dir'],
             ROOT_DIR=ROOT_DIR,
             vqa_dir=config['vqa_dir'])
-    val_dataset = MurelNetDataset(
+    val_dataset = VQAv2Dataset(
             split="val",
             txt_enc=config['txt_enc'],
             bottom_up_features_dir=config['bottom_up_features_dir'],
@@ -242,10 +264,12 @@ def run():
     best_model_file_name = names['best_model_file_name']
 
     if config['checkpoint_option'] == 'resume_last':
-        model, optimizer, start_epoch = load_checkpoint(
+        model, optimizer, start_epoch, epoch_since_best = load_checkpoint(
                 checkpoint_file_name, model, optimizer)
+        
+        
     elif config['checkpoint_option'] == 'best':
-        model, optimizer, start_epoch = load_checkpoint(
+        model, optimizer, start_epoch, epoch_since_best = load_checkpoint(
                 best_model_file_name, model, optimizer)
     else:
         start_epoch = 0
@@ -329,23 +353,32 @@ def run():
         average_batch_loss = total_batch_loss / batch_counter
         print('Training Results: Epoch {} Average Epoch Loss: {:.2f}'.format(epoch, average_batch_loss))
         writer.add_scalar("training/average_epoch_loss", average_batch_loss, epoch)
-        accuracy, loss = val_evaluate(model, epoch, val_loader, writer, evaluator, train_dataset.aid_to_ans, RESULTS_FILE_PATH, device, criterion)
-
+        accuracy, average_val_loss = val_evaluate(config, model, epoch, val_loader, 
+                                      writer, evaluator, train_dataset.aid_to_ans, 
+                                      RESULTS_FILE_PATH, device, criterion)
+        writer.add_scalars('train_val_loss_curve', {
+                    'train_avg_loss': average_batch_loss,
+                    'val_avg_loss': average_val_loss}, epoch)
+        
         isBest = False
-        if accuracy > max_accuracy:
+        if accuracy - max_accuracy > 0.01:
             print('Validation accuracy at epoch {} is higher than the max validation accuracy!'.format(epoch))
             print('')
             print('Updating max_accuracy...')
             max_accuracy = accuracy
             isBest = True
+            epoch_since_best = 0
         else:
+            epoch_since_best += 1
             print('Validation accuracy in epoch {} is lower than the max validation accuracy'.format(epoch))
+        
 
         state = {
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
             'epoch': epoch + 1,
             'accuracy': accuracy,
+            'epoch_since_best': epoch_since_best
         }
 
         info = {
@@ -354,12 +387,17 @@ def run():
             'best_model_file_name': best_model_file_name,
             'epoch': epoch + 1,
             'accuracy': accuracy,
+            'epoch_since_best': epoch_since_best
             'config': config,
         }
         print('')
         print('Checkpointing model..')
         if ((epoch + 1) % config['checkpoint_every']) == 0 or isBest:
             save_checkpoint(state, info)
+            
+        if epoch_since_best == 4:
+            print('No improvement over 4 epochs. Early stopping...')
+            break
 
 
 if __name__ == '__main__':

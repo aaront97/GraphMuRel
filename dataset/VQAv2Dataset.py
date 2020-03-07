@@ -5,7 +5,7 @@ import os
 import transforms.transforms as transforms
 from murel.models.GraphConstructor import GraphConstructor
 
-class MurelNetDataset(AbstractVQADataset):
+class VQAv2Dataset(AbstractVQADataset):
     def __init__(self,
                  bottom_up_features_dir='',
                  split='train',
@@ -21,7 +21,7 @@ class MurelNetDataset(AbstractVQADataset):
                  include_graph_data=True,
                  graph_type='knn'
                  ):
-        super(MurelNetDataset, self).__init__(
+        super(VQAv2Dataset, self).__init__(
                  processed_dir=processed_dir,
                  model="murel",
                  vqa_dir=vqa_dir,
