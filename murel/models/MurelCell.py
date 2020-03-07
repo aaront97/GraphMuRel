@@ -29,7 +29,7 @@ class MurelCell(nn.Module):
         self.pairwise_agg = get_aggregation_func(config['pairwise_agg'], dim=2)
     
     def compute_relation_attention(self, relations):
-        _, _, no_objects = relations.size()
+        _, _, no_objects, _ = relations.size()
         r_att = self.linear0(relations)
         r_att = torch.nn.functional.tanh(r_att)
         r_att = self.linear1(r_att)
@@ -40,9 +40,9 @@ class MurelCell(nn.Module):
         r_att = masked_softmax(r_att, no_objects)
         # Glimpses contain attention values for each question_feature
         # DIM: BATCH_SIZE x NO_WORDS
-        r_att = r_att.unsqueeze(2).expand(-1, -1, no_objects)
+        r_att = r_att.unsqueeze(3).expand(-1, -1, no_objects)
         r_att = relations * r_att
-        r_att = torch.sum(r_att, dim=1)
+        r_att = torch.sum(r_att, dim=2)
         return r_att
 
     def pairwise(self, 
