@@ -387,7 +387,7 @@ def run():
             'best_model_file_name': best_model_file_name,
             'epoch': epoch + 1,
             'accuracy': accuracy,
-            'epoch_since_best': epoch_since_best
+            'epoch_since_best': epoch_since_best,
             'config': config,
         }
         print('')

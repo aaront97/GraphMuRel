@@ -13,7 +13,7 @@ loss_function: 'NLLLoss' # can be soft_cross_entropy or NLLLoss, remember to cha
 batch_size: 256
 reduction_factor: 8
 grad_clip: 0.25
-lr: 0.0003 #orig 0.00005
+lr: 0.0006 #orig 0.00005
 gradual_warmup_steps: [0.5, 2.0, 7.0]  #[1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25

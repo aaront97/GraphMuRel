@@ -38,7 +38,8 @@ class MurelNet(nn.Module):
         object_features_list = item['object_features_list']
         bounding_boxes = item['bounding_boxes']
         question_lengths = item['question_lengths']
-        graph_batch = item['graph_batch']
+        if self.use_graph_module:
+            graph_batch = item['graph_batch']
 
         # q_att
         question_each_word_embedding = self.txt_enc.embedding(question_ids)
