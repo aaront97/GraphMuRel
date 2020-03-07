@@ -27,6 +27,13 @@ seed: 1337
 fusion_type: block
 use_graph_module: False
 use_pairwise: True
+murel_cell_attention:
+    linear0:
+        input_dim: 2048 #fixed
+        output_dim: 512
+    linar1:
+        input_dim: 512
+        output_dim: 1
 graph:
     input_dim: 2048
     output_dim: 2048

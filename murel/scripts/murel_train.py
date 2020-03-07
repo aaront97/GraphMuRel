@@ -49,9 +49,7 @@ def val_evaluate(config, model, epoch, val_loader,
                     'object_features_list': data['object_features_list'].cuda(),
                     'bounding_boxes': data['bounding_boxes'].cuda(),
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
-                    'question_lengths': data['question_lengths'].cuda(),
-                    'id_unique': data['id_unique'].cuda(),
-                    'id_weights': data['id_weights'].cuda()
+                    'question_lengths': data['question_lengths'].cuda()
             }
             
             if config['use_graph_module']:

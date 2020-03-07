@@ -16,7 +16,7 @@ class MurelNet(nn.Module):
         self.use_graph_module = config['use_graph_module']
 
         if config['use_pairwise']:
-            self.murel_cell = MurelCell(config['fusion'])
+            self.murel_cell = MurelCell(config)
         if config['use_graph_module']:
             self.graph_module = GraphCell(config['graph']['input_dim'],
                                           config['graph']['output_dim'],
