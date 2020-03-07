@@ -329,7 +329,7 @@ def run():
         average_batch_loss = total_batch_loss / batch_counter
         print('Training Results: Epoch {} Average Epoch Loss: {:.2f}'.format(epoch, average_batch_loss))
         writer.add_scalar("training/average_epoch_loss", average_batch_loss, epoch)
-        accuracy = val_evaluate(model, epoch, val_loader, writer, evaluator, train_dataset.aid_to_ans, RESULTS_FILE_PATH, device)
+        accuracy, loss = val_evaluate(model, epoch, val_loader, writer, evaluator, train_dataset.aid_to_ans, RESULTS_FILE_PATH, device, criterion)
 
         isBest = False
         if accuracy > max_accuracy:

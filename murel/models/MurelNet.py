@@ -92,7 +92,7 @@ class MurelNet(nn.Module):
         if self.use_graph_module:
             object_features_list = object_features_list.contiguous()
             object_features_list = object_features_list.view(batch_size * num_obj, -1)
-            for i in range(self.unroll_steps):
+            for i in range(1):
                 object_features_list = self.graph_module(
                                             question_attentioned_repeated,
                                             object_features_list,
