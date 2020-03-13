@@ -256,8 +256,8 @@ class AbstractVQADataset(Dataset):
             known_words, _ = self.get_known_words(train_set)
         else:
             known_words = self.return_all_words(train_set)
-        wid_to_word = {idx: word for idx, word in enumerate(known_words)}
-        word_to_wid = {word:idx for idx, word in enumerate(known_words)}
+        wid_to_word = {idx+1: word for idx, word in enumerate(known_words)}
+        word_to_wid = {word:idx+1 for idx, word in enumerate(known_words)}
 
         train_set = self.remove_question_if_not_top_answer(train_set, ans_to_aid)
 

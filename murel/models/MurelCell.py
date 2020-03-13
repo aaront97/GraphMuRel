@@ -12,7 +12,7 @@ class MurelCell(nn.Module):
         fusion_box_cfg = config['fusion']['box']
         fusion_fused_cfg = config['fusion']['obj_features_obj_features']
         
-        if 'murel_cell_attention' in config:
+        if config['murel_attention']:
             self.murel_cell_attention = True
             self.murel_cell_attention_linear0 = nn.Linear(
                     config['murel_cell_attention']['linear0']['input_dim'],
@@ -29,18 +29,13 @@ class MurelCell(nn.Module):
         self.pairwise_agg = get_aggregation_func(config['pairwise_agg'], dim=2)
     
     def compute_relation_attention(self, relations):
-        _, _, no_objects, _ = relations.size()
-        r_att = self.linear0(relations)
+        _, _, no_objects, no_feats = relations.size()
+        r_att = self.murel_cell_attention_linear0(relations)
         r_att = torch.nn.functional.tanh(r_att)
-        r_att = self.linear1(r_att)
-
-        # http://juditacs.github.io/2018/12/27/masked-attention.html
-        # Compute attention weights such that the padded units
-        # give 0 attention weights
-        r_att = masked_softmax(r_att, no_objects)
-        # Glimpses contain attention values for each question_feature
-        # DIM: BATCH_SIZE x NO_WORDS
-        r_att = r_att.unsqueeze(3).expand(-1, -1, no_objects)
+        r_att = self.murel_cell_attention_linear1(r_att)
+        r_att = torch.softmax(r_att, dim=2)
+        r_att = torch.squeeze(torch.unbind(r_att, dim=3)[0])
+        r_att = r_att.unsqueeze(3).expand(-1, no_objects, no_objects, no_feats)
         r_att = relations * r_att
         r_att = torch.sum(r_att, dim=2)
         return r_att

@@ -1,4 +1,4 @@
-name: murel
+name: murel_dropout #murel_dropout #murel_cell_attention
 checkpoint_option: fresh #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
@@ -13,13 +13,13 @@ loss_function: 'NLLLoss' # can be soft_cross_entropy or NLLLoss, remember to cha
 batch_size: 256
 reduction_factor: 8
 grad_clip: 0.25
-lr: 0.0006 #orig 0.00005
+lr: 0.0003 #orig 0.0006
 gradual_warmup_steps: [0.5, 2.0, 7.0]  #[1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 epochs: 25
 checkpoint_every: 1
-num_workers: 12
+num_workers: 4
 load_last_epoch: True
 unroll_steps: 3
 log_every: 50
@@ -27,11 +27,12 @@ seed: 1337
 fusion_type: block
 use_graph_module: False
 use_pairwise: True
+murel_attention: False
 murel_cell_attention:
     linear0:
         input_dim: 2048 #fixed
         output_dim: 512
-    linar1:
+    linear1:
         input_dim: 512
         output_dim: 1
 graph:
@@ -59,8 +60,8 @@ fusion:
         type: block
         input_dims: [4800, 2048]
         output_dims: 2048
-        dropout_prelin: 0.1
-        dropout_input: 0.
+        dropout_prelin: 0.
+        dropout_input: 0.1
         chunks: 20
         rank: 15
         mm_dim: 1000
@@ -86,8 +87,8 @@ fusion:
         type: block
         input_dims: [4800, 2048]
         output_dims: 3000
-        dropout_prelin: 0.1
-        dropout_input: 0.
+        dropout_prelin: 0.
+        dropout_input: 0.1
         chunks: 20
         rank: 10
         mm_dim: 1600
