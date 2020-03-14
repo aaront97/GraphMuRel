@@ -2,8 +2,6 @@ import torch
 
 # http://juditacs.github.io/2018/12/27/masked-attention.html
 # Compute attention weights such that the padded units give 0 attention weights
-
-
 def masked_softmax(x, lengths):
     max_length = x.size(1)
     indices = torch.arange(max_length).to(device=x.device)
@@ -32,3 +30,17 @@ def get_aggregation_func(agg_type, dim):
         def f(x):
             return torch.mean(x, dim=dim)
         return f
+    
+def tokenize(self, s):
+    # we don't replace # because # is used to refer to number of items
+    # Tokenizing code taken from Cadene
+    s = s.rstrip()
+    t_str = s.lower()
+    for i in [r'\?',r'\!',r'\'',r'\"',r'\$',r'\:',r'\@',r'\(',r'\)',r'\,',r'\.',r'\;']:
+        t_str = re.sub(i, '', t_str)
+
+    for i in [r'\-',r'\/']:
+        t_str = re.sub( i, ' ', t_str)
+        q_list = re.sub(r'\?','',t_str.lower()).split(' ')
+        q_list = list(filter(lambda x: len(x) > 0, q_list))
+    return q_list
