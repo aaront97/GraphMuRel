@@ -15,7 +15,7 @@ from evaluation.eval_vqa import VQA_Evaluator
 import json
 import argparse
 import numpy as np
-from models.factory.factory_model import factory_model
+from models.factory.factory_model import factory_model, factory_config
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model_type',
@@ -196,8 +196,7 @@ def set_seed(seed):
 
 
 def run():
-    with open('../configs/murel.yaml') as f:
-        config = yaml.load(f)
+    config = factory_config(args.model_type)
     config['RESULTS_FILE_PATH'] = config['RESULTS_FILE_PATH'].format(config['name'])
     set_seed(config['seed'])
     ROOT_DIR = config['ROOT_DIR']
@@ -259,8 +258,7 @@ def run():
     word_vocabulary = [word for _, word in train_dataset.word_to_wid.items()]
 
     # Build model
-    model = factory_model(args.model_type, word_vocabulary)
-    #model = MurelNet(config, word_vocabulary)
+    model = factory_model(args.model_type, config, word_vocabulary)
 
     # Transfer model to GPU
     model = model.cuda()
