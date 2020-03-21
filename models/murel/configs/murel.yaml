@@ -16,14 +16,14 @@ grad_clip: 0.25
 lr: 0.0003 #orig 0.0006
 gradual_warmup_steps: [0.5, 2.0, 7.0]  #[1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
-lr_decay_rate: .25
+lr_decay_rate: .75
 epochs: 25
 checkpoint_every: 1
 num_workers: 4
 load_last_epoch: True
 unroll_steps: 3
 log_every: 50
-seed: 1337
+seed: 1403
 fusion_type: block
 use_graph_module: False
 use_pairwise: True
