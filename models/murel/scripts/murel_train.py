@@ -13,7 +13,13 @@ from schedulers.schedulers import LR_List_Scheduler
 from loss_functions.loss_functions import soft_cross_entropy
 from evaluation.eval_vqa import VQA_Evaluator
 import json
+import argparse
 import numpy as np
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-m', '--model',
+                    help="specify the model you'd like to train, options: murel, agg_concat, attention, resnet_concat")
+parser.parse_args()
 
 
 def create_summary_writer(model, loader, logdir):
@@ -186,7 +192,7 @@ def set_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
 
-# Fix dirs
+
 def run():
     with open('murel.yaml') as f:
         config = yaml.load(f)
@@ -211,7 +217,7 @@ def run():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('CUDA AVAILABILITY: {}, Device used: {}'
           .format(torch.cuda.is_available(), device))
-    
+
     train_dataset = VQAv2Dataset(
             split="train",
             txt_enc=config['txt_enc'],
@@ -396,6 +402,8 @@ def run():
         if epoch_since_best == 4:
             print('No improvement over 4 epochs. Early stopping...')
             break
+
+
 
 
 if __name__ == '__main__':

@@ -2,8 +2,8 @@
 import torch
 import torch.nn as nn
 from fusion_net.factory.factory_fusion import factory_fusion
-from murel.models.MurelCell import MurelCell
-from murel.models.GraphCell import GraphCell
+from models.murel.models.MurelCell import MurelCell
+from models.murel.models.GraphCell import GraphCell
 from dataset.TextEncFactory import get_text_enc
 from dataset.auxiliary_functions import masked_softmax, get_aggregation_func
 from torch_geometric.nn import global_max_pool
