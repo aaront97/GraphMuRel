@@ -4,7 +4,14 @@ bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_3
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/'
 vqa_dir: '/auto/homes/bat34/VQA'
-checkpoint_option: fresh  #can be best, fresh, or resume_last
+checkpoint_option: fresh #can be best, fresh, or resume_last
+include_keys: ['txt_enc',
+                'batch_size',
+                'lr',
+                'lr_decay_rate',
+                'hidden_list',
+                'attention_fusion_type',
+                'final_fusion_type']
 dropout: 0.2
 txt_enc: BayesianUniSkip
 seed: 8918

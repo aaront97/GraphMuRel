@@ -4,6 +4,16 @@ ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
+include_keys: ['seed',
+               'loss_function',
+               'txt_enc',
+               'pooling_agg',
+               'pairwise_agg',
+               'batch_size',
+               'lr',
+               'lr_decay_rate',
+               'unroll_steps',
+               'fusion_type']
 vqa_dir: '/auto/homes/bat34/VQA'
 txt_enc: "BayesianUniSkip"
 pooling_agg: 'max'

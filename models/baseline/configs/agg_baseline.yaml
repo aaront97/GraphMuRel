@@ -6,6 +6,13 @@ ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
 bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/'
+include_keys: ['agg_type',
+               'q_self_attention',
+               'txt_enc',
+               'batch_size',
+               'lr',
+               'fusion_type',
+              ]
 vqa_dir: '/auto/homes/bat34/VQA'
 dropout: 0.2
 txt_enc: BayesianUniSkip
