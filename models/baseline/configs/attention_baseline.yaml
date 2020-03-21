@@ -7,6 +7,7 @@ vqa_dir: '/auto/homes/bat34/VQA'
 checkpoint_option: fresh  #can be best, fresh, or resume_last
 dropout: 0.2
 txt_enc: BayesianUniSkip
+seed: 8918
 batch_size: 256
 loss_function: 'NLLLoss' # can be soft_cross_entropy or NLLLoss, remember to change RESULTS_FILE_PATH
 RESULTS_FILE_PATH: '/auto/homes/bat34/VQA_PartII/models/baseline/{}-temp.json'

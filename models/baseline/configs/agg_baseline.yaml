@@ -18,6 +18,7 @@ epochs: 25
 checkpoint_every: 1
 reduction_factor: 8
 num_workers: 4
+seed: 8891
 log_every: 50
 gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
