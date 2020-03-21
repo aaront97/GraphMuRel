@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
+import pytest
 from dataset.VQAv2Dataset import VQAv2Dataset
-from auxiliary_functions import tokenize
+from dataset.auxiliary_functions import tokenize
 import yaml
 from torch.utils.data import DataLoader
 import os
-import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def config():
-    with open('murel/scripts/murel.yaml') as f:
+    with open('/home/bat34/VQA_PartII/murel/scripts/murel.yaml') as f:
         config = yaml.load(f)
     config['batch_size'] = 32
     return config
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def anno(config):
     path_train_anno = os.path.join(config['vqa_dir'],
                                    'Annotations',
@@ -34,7 +34,7 @@ def anno(config):
     return annotations
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def ques(config):
     path_train_ques = os.path.join(config['vqa_dir'],
                                    'Questions',
@@ -53,7 +53,7 @@ def ques(config):
     return questions
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def dataset(config):
     '''Returns the training dataset'''
     dataset = VQAv2Dataset(split="train",
@@ -66,7 +66,7 @@ def dataset(config):
     return dataset
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def loader(config, dataset):
     loader = DataLoader(dataset,
                         shuffle=True,
@@ -79,7 +79,7 @@ def loader(config, dataset):
 def test_legitimate_question_ids(dataset, loader, ques):
     iter_loader = iter(loader)
     batch = next(iter_loader)
-    batch_question_unique_ids = batch['question_unique_ids']
+    batch_question_unique_ids = batch['question_unique_id']
     for id in batch_question_unique_ids:
         assert id in ques
 
@@ -101,7 +101,7 @@ def test_reconstruct_question(dataset, loader, ques):
 
     correct_tokens = []
     for qid in batch['question_unique_id']:
-        string_qns = ques['qid']['question']
+        string_qns = ques[qid]['question']
         string_qns_tokenized = tokenize(string_qns)
         correct_tokens.append(string_qns_tokenized)
     assert correct_tokens == reconstructed
@@ -112,7 +112,7 @@ def test_question_lengths(dataset, loader, ques):
     batch = next(iter_loader)
     batch['question_lengths'] = list(batch['question_lengths'])
     for i, qid in enumerate(batch['question_unique_id']):
-        string_qns = ques['qid']['question']
+        string_qns = ques[qid]['question']
         string_qns_tokenized = tokenize(string_qns)
         assert len(string_qns_tokenized) == batch['question_lengths'][i].item()
 
