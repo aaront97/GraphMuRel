@@ -1,4 +1,5 @@
 import torch
+import re
 
 # http://juditacs.github.io/2018/12/27/masked-attention.html
 # Compute attention weights such that the padded units give 0 attention weights
@@ -31,7 +32,7 @@ def get_aggregation_func(agg_type, dim):
             return torch.mean(x, dim=dim)
         return f
     
-def tokenize(self, s):
+def tokenize(s):
     # we don't replace # because # is used to refer to number of items
     # Tokenizing code taken from Cadene
     s = s.rstrip()

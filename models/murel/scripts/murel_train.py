@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import os
 import yaml
 from dataset.VQAv2Dataset import VQAv2Dataset
-from murel.models.MurelNet import MurelNet
+from models.murel.networks.MurelNet import MurelNet
 from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
@@ -194,7 +194,7 @@ def set_seed(seed):
 
 
 def run():
-    with open('murel.yaml') as f:
+    with open('../configs/murel.yaml') as f:
         config = yaml.load(f)
     set_seed(config['seed'])
     ROOT_DIR = config['ROOT_DIR']

@@ -4,11 +4,10 @@ from torch.utils.data import DataLoader
 import os
 import yaml
 from dataset.VQAv2Dataset import VQAv2Dataset
-from baseline.models.AggConcatNet import AggConcatNet
+from models.baseline.networks.AggConcatNet import AggConcatNet
 from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
-from schedulers.schedulers import LR_List_Scheduler
 
 
 def create_summary_writer(model, loader, logdir):
@@ -147,7 +146,7 @@ def get_dirs(config, include_keys=[]):
 
 # Fix dirs
 def run():
-    with open('agg_baseline.yaml') as f:
+    with open('../configs/agg_baseline.yaml') as f:
         config = yaml.load(f)
     ROOT_DIR = config['ROOT_DIR']
     names = get_dirs(config, include_keys=['agg_type', 'q_self_attention',

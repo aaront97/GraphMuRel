@@ -3,7 +3,7 @@ from dataset.AbstractVQADataset import AbstractVQADataset
 import torch
 import os
 import transforms.transforms as transforms
-from murel.models.GraphConstructor import GraphConstructor
+
 
 class VQAv2Dataset(AbstractVQADataset):
     def __init__(self,

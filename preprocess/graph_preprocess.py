@@ -1,4 +1,4 @@
-from murel.models.GraphConstructor import GraphConstructor
+from models.murel.networks.GraphConstructor import GraphConstructor
 import argparse
 import progressbar
 import os

@@ -1,6 +1,6 @@
 name: murel_dropout #murel_dropout #murel_cell_attention
 checkpoint_option: fresh #can be 'best' or 'fresh' or 'resume_last'
-ROOT_DIR: '/auto/homes/bat34/VQA_PartII/murel'
+ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
@@ -8,7 +8,7 @@ vqa_dir: '/auto/homes/bat34/VQA'
 txt_enc: "BayesianUniSkip"
 pooling_agg: 'max'
 pairwise_agg: 'max' #Remember to change fusion's pairwise_agg too
-RESULTS_FILE_PATH: '/auto/homes/bat34/VQA_PartII/murel/murel_graph_knn_NLLLoss_val2014-temp_results.json'
+RESULTS_FILE_PATH: '/auto/homes/bat34/VQA_PartII/models/murel/{}.json'
 loss_function: 'NLLLoss' # can be soft_cross_entropy or NLLLoss, remember to change RESULTS_FILE_PATH
 batch_size: 256
 reduction_factor: 8

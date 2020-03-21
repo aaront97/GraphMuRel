@@ -1,11 +1,11 @@
 data/*
 torch_tensorboard_tutorial
 __pycache__
-baseline/trained_models/
-baseline/logs/
-murel/logs
-murel/trained_models
-murel/old_pretrained_models
+models/baseline/trained_models/
+models/baseline/logs/
+models/murel/logs
+models/murel/trained_models
+models/murel/old_pretrained_models
 baseline/*.json
 murel/*.json
 tests/test_graphs/

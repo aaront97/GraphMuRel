@@ -1,18 +1,12 @@
 import torch 
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import os
-import numpy as np
 import yaml
 from dataset.ConcatBaselineDataset import ConcatBaselineDataset
-from baseline.models.ConcatBaselineNet import ConcatBaselineNet
+from models.baseline.networks import ConcatBaselineNet
 from tensorboardX import SummaryWriter
-from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
-from ignite.metrics import Accuracy, Loss
-from ignite.contrib.handlers.tqdm_logger import ProgressBar
 import transforms.transforms as trfm
-import subprocess
 import tqdm
 
 def get_hidden_layer_list(input_dim, out_dim, size):

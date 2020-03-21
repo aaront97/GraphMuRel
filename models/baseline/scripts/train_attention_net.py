@@ -4,11 +4,10 @@ from torch.utils.data import DataLoader
 import os
 import yaml
 from dataset.VQAv2Dataset import VQAv2Dataset
-from baseline.models.AttentionNet import AttentionNet
+from models.baseline.networks import AttentionNet
 from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
-from schedulers.schedulers import LR_List_Scheduler
 
 
 def create_summary_writer(model, loader, logdir):
