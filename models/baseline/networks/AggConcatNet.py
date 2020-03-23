@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from dataset.auxiliary_functions import masked_softmax
 from dataset.TextEncFactory import get_text_enc
-from models.baseline.networks import ConcatMLP
+from models.baseline.networks.ConcatMLP import ConcatMLP
 from fusion_net.factory.factory_fusion import factory_fusion
 
 

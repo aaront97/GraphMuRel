@@ -315,7 +315,7 @@ def run():
                     'id_weights': data['id_weights'].cuda()
             }
 
-            if config['use_graph_module']:
+            if 'murel' in config['name'] and config['use_graph_module']:
                 item['graph_batch'] = data['graph'].to(device)
 
 
@@ -337,7 +337,8 @@ def run():
 
             if local_iteration % (config['log_every'] * reduction_factor) == 0:
                 running_loss = running_loss / (config['log_every'] * reduction_factor)
-                print("Model: {} Epoch[{}] Iteration[{}/{}] Loss: {:.2f}".format(config['name'], epoch,
+                print("Model: {}".format(config['name']))
+                print("Epoch[{}] Iteration[{}/{}] Loss: {:.2f}".format(epoch,
                       local_iteration, len(train_loader), running_loss))
                 writer.add_scalar("training/loss",
                                   running_loss, global_iteration)
