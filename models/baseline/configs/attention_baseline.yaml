@@ -1,10 +1,10 @@
-name: concat_baseline_self_attention_block
+name: concat_baseline_self_attention_block_nan1000
 ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
 bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/'
 vqa_dir: '/auto/homes/bat34/VQA'
-checkpoint_option: fresh #can be best, fresh, or resume_last
+checkpoint_option: resume_last #can be best, fresh, or resume_last
 include_keys: ['seed',
                'txt_enc',
                'batch_size',

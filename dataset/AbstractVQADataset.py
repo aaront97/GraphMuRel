@@ -14,7 +14,7 @@ class AbstractVQADataset(Dataset):
                  processed_dir='/auto/homes/bat34/VQA_PartII/data/processed_splits',
                  model='baseline',
                  vqa_dir='/auto/homes/bat34/VQA',
-                 no_answers=3000,
+                 no_answers=1000,
                  sample_answers=False,
                  skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts', 
                  split='train',

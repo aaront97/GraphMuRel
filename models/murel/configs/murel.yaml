@@ -1,4 +1,4 @@
-name: murel_dropout #murel_dropout #murel_cell_attention
+name: murel_dropout_nan1000 #murel_dropout #murel_cell_attention
 checkpoint_option: resume_last #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
@@ -26,7 +26,7 @@ grad_clip: 0.25
 lr: 0.0003 #orig 0.0006
 gradual_warmup_steps: [0.5, 2.0, 7.0]  #[1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
-lr_decay_rate: .75
+lr_decay_rate: .25
 epochs: 25
 checkpoint_every: 1
 num_workers: 4

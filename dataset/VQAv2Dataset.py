@@ -34,7 +34,7 @@ class VQAv2Dataset(AbstractVQADataset):
         self.include_graph_data = include_graph_data
         if graph_type == 'knn':
             self.graph_dir = '/auto/homes/bat34/VQA_PartII/' + \
-                             'data/preprocessed_graphs_knn/'
+                             'data/preprocessed_graphs_knn_neighbours_6/'
 
         if self.split == 'train':
             self.collate_fn = transforms.Compose([

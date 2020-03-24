@@ -9,10 +9,9 @@ import subprocess
 
 def main():
     if args.graph_type == 'knn':
-        constructor = GraphConstructor.getKNNConstructor(k=6, force_undirected=True)
+        constructor = GraphConstructor.getKNNConstructor(k=args.no_neighbours, force_undirected=True)
     feat_dir = '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36'
-    graph_files_dir = '/auto/homes/bat34/VQA_PartII/data/preprocessed_graphs_knn'
-
+    graph_files_dir = '/auto/homes/bat34/VQA_PartII/data/preprocessed_graphs_knn_neighbours_{}'.format(args.no_neighbours)
     if not os.path.exists(graph_files_dir):
         subprocess.run(['mkdir', '-p', graph_files_dir])
 
@@ -29,6 +28,7 @@ def main():
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--graph_type', action='store', dest='graph_type')
+parser.add_argument('-k', '--no-neighbours', type=int)
 args = parser.parse_args()
 
 if __name__ == '__main__':
