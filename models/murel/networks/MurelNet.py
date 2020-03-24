@@ -7,6 +7,7 @@ from models.murel.networks.GraphCell import GraphCell
 from dataset.TextEncFactory import get_text_enc
 from dataset.auxiliary_functions import masked_softmax, get_aggregation_func
 from torch_geometric.nn import global_max_pool
+from copy import deepcopy
 
 
 class MurelNet(nn.Module):
@@ -22,6 +23,7 @@ class MurelNet(nn.Module):
                                           config['graph']['output_dim'],
                                           config['fusion'])
 
+        self.buffer = None
         self.final_fusion = factory_fusion(config['fusion']['final_fusion'])
         self.unroll_steps = config['unroll_steps']
         self.log_softmax = nn.LogSoftmax(dim=1)
@@ -32,6 +34,9 @@ class MurelNet(nn.Module):
                                  config['q_att']['linear1']['output_dim'])
         self.pooling_agg = get_aggregation_func(config['pooling_agg'], dim=1)
 
+    def initialise_buffers(self):
+        self.buffer = {}
+        self.murel_cell.initialise_buffers()
 
     def forward(self, item):
         question_ids = item['question_ids']
@@ -88,6 +93,8 @@ class MurelNet(nn.Module):
                                         bounding_boxes,
                                         batch_size,
                                         num_obj)
+                if self.buffer is not None:
+                    self.buffer[i] = deepcopy(self.murel_cell.buffer)
             pool = self.pooling_agg(object_features_list)
 
         if self.use_graph_module:

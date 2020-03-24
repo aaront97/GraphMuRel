@@ -22,12 +22,16 @@ class MurelCell(nn.Module):
                     config['murel_cell_attention']['linear1']['output_dim'])    
         else:
             self.murel_cell_attention = False
-        
+
+        self.buffer = None
         self.fusion_features = factory_fusion(fusion_features_cfg)
         self.fusion_box = factory_fusion(fusion_box_cfg)
         self.fusion_fused = factory_fusion(fusion_fused_cfg)
         self.pairwise_agg = get_aggregation_func(config['pairwise_agg'], dim=2)
-    
+
+    def initialise_buffers(self):
+        self.buffer = {}
+
     def compute_relation_attention(self, relations):
         _, _, no_objects, no_feats = relations.size()
         r_att = self.murel_cell_attention_linear0(relations)
@@ -66,6 +70,11 @@ class MurelCell(nn.Module):
             e_hat = self.compute_relation_attention(relations)
         else:
             e_hat = self.pairwise_agg(relations)
+            if self.buffer is not None:
+                _, argmax = torch.max(relations)
+                self.buffer['argmax'] = argmax.data.cpu()
+
+
         res = fused_features + e_hat
         return res
 
