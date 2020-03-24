@@ -1,5 +1,5 @@
 name: murel_dropout_nan1000 #murel_dropout #murel_cell_attention
-checkpoint_option: resume_last #can be 'best' or 'fresh' or 'resume_last'
+checkpoint_option: fresh #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
@@ -96,7 +96,7 @@ fusion:
     final_fusion:
         type: block
         input_dims: [4800, 2048]
-        output_dims: 3000
+        output_dims: 1000 #CHANGE WHEN CHANGING NANS
         dropout_prelin: 0.
         dropout_input: 0.1
         chunks: 20
