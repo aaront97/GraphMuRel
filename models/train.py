@@ -162,17 +162,15 @@ def get_dirs(config, include_keys=[]):
         raise ValueError(
                 'Please include keys to include for' +
                 'naming model and log directories')
-    root_dir = config['ROOT_DIR']
+    root_dir = config['checkpoint_dir']
     model_name = config['name']
     for key in include_keys:
         model_name += "_{}_{}".format(key, config[key])
     log_dir = os.path.join(root_dir, 'logs', model_name)
     checkpoint_dir = os.path.join(root_dir,
-                                  'trained_models',
                                   'checkpoints',
                                   model_name)
     best_model_dir = os.path.join(root_dir,
-                                  'trained_models',
                                   'best_models',
                                   model_name)
     checkpoint_file_name = os.path.join(checkpoint_dir, 'checkpoint.pth')

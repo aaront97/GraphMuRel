@@ -70,12 +70,13 @@ class MurelCell(nn.Module):
             e_hat = self.compute_relation_attention(relations)
         else:
             e_hat = self.pairwise_agg(relations)
-            if self.buffer is not None:
-                _, argmax = torch.max(relations)
-                self.buffer['argmax'] = argmax.data.cpu()
+
 
 
         res = fused_features + e_hat
+        if self.buffer is not None:
+            _, argmax = torch.max(res, dim=1)
+            self.buffer['argmax'] = argmax.data.cpu()
         return res
 
     def fuse_object_features_with_questions(self,

@@ -11,7 +11,7 @@ def main():
     if args.graph_type == 'knn':
         constructor = GraphConstructor.getKNNConstructor(k=args.no_neighbours, force_undirected=True)
     feat_dir = '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36'
-    graph_files_dir = '/auto/homes/bat34/VQA_PartII/data/preprocessed_graphs_knn_neighbours_{}'.format(args.no_neighbours)
+    graph_files_dir = '/local/scratch/bat34/graphs/preprocessed_graphs_knn_neighbours_{}'.format(args.no_neighbours)
     if not os.path.exists(graph_files_dir):
         subprocess.run(['mkdir', '-p', graph_files_dir])
 
