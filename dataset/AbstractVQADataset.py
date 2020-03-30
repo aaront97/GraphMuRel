@@ -46,18 +46,23 @@ class AbstractVQADataset(Dataset):
         self.aid_to_ans = torch.load(os.path.join(self.processed_dir, 'aid_to_ans.pth'))
     
 
+    def standardise(self, s):
+        s = s.lower()
+        s = s.rstrip()
+        for i in [r'\?',r'\!',r'\'',r'\"',r'\$',r'\:',r'\@',r'\(',r'\)',r'\,',r'\.',r'\;']:
+            s = re.sub(i, '', s)
+        return s
+
     def tokenize(self, s):
         # we don't replace # because # is used to refer to number of items
         # Tokenizing code taken from Cadene
-        s = s.rstrip()
-        t_str = s.lower()
-        for i in [r'\?',r'\!',r'\'',r'\"',r'\$',r'\:',r'\@',r'\(',r'\)',r'\,',r'\.',r'\;']:
-            t_str = re.sub(i, '', t_str)
+        t_str = self.standardise(s)
 
         for i in [r'\-',r'\/']:
             t_str = re.sub( i, ' ', t_str)
-            q_list = re.sub(r'\?','',t_str.lower()).split(' ')
-            q_list = list(filter(lambda x: len(x) > 0, q_list))
+
+        q_list = re.sub(r'\?','',t_str.lower()).split(' ')
+        q_list = list(filter(lambda x: len(x) > 0, q_list))
         return q_list
 
     def merge_questions_with_annotations(self, ques, anno):
