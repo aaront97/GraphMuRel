@@ -244,7 +244,8 @@ def train():
             collate_fn=val_dataset.collate_fn)
 
     # Construct word vocabulary
-    word_vocabulary = [word for _, word in train_dataset.word_to_wid.items()]
+    # !!!!!!!!!!!
+    word_vocabulary = [word for word, _ in train_dataset.word_to_wid.items()]
 
     # Build model
     model = model_factory.create_model(args.model_type, config, word_vocabulary)
