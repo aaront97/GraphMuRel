@@ -4,25 +4,25 @@ import torch.nn.functional as F
 from dataset.auxiliary_functions import masked_softmax
 from dataset.TextEncFactory import get_text_enc
 from models.baseline.networks.ConcatMLP import ConcatMLP
-from fusion_net.factory.factory_fusion import factory_fusion
+from fusion.factory.FusionFactory import FusionFactory
 
 
 class AttentionNet(nn.Module):
     def __init__(self, config, word_vocabulary):
         super(AttentionNet, self).__init__()
 
+        self.fusion_factory = FusionFactory()
         if config['attention_fusion_type'] == 'concat_mlp':
             self.attention_fusion = ConcatMLP(config['attention_fusion_mlp'])
         elif config['attention_fusion_type'] == 'block':
-            self.attention_fusion = factory_fusion(
-                    config['attention_fusion_block'])
+            self.attention_fusion = self.fusion_factory.create_fusion(config['attention_fusion_block'])
         else:
             raise ValueError('Unimplemented attention fusion')
 
         if config['final_fusion_type'] == 'concat_mlp':
             self.final_fusion = ConcatMLP(config['final_fusion_mlp'])
         elif config['final_fusion_type'] == 'block':
-            self.final_fusion = factory_fusion(config['final_fusion_block'])
+            self.final_fusion = self.fusion_factory.create_fusion(config['final_fusion_block'])
         else:
             raise ValueError('Unimplemented final fusion')
 

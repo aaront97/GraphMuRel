@@ -39,15 +39,13 @@ class VQAv2Dataset(AbstractVQADataset):
         if self.split == 'train':
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
-                transforms.PadQuestions(),
-                transforms.Pad1DTensors(dict_keys=['id_unique', 'id_weights']),
+                transforms.Pad1DTensors(dict_keys=['question_ids', 'id_unique', 'id_weights']),
                 transforms.BatchGraph(),
                 transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
         else:
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
-                transforms.PadQuestions(),
                 transforms.BatchGraph(),
                 transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn

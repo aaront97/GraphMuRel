@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
-from fusion_net.factory.factory_fusion import factory_fusion
+from fusion.factory.FusionFactory import FusionFactory
 from models.murel.networks.MurelCell import MurelCell
 from models.murel.networks.GraphCell import GraphCell
 from dataset.TextEncFactory import get_text_enc
@@ -13,6 +13,7 @@ from copy import deepcopy
 class MurelNet(nn.Module):
     def __init__(self, config, word_vocabulary):
         super(MurelNet, self).__init__()
+        self.fusion_factory = FusionFactory()
         self.use_pairwise = config['use_pairwise']
         self.use_graph_module = config['use_graph_module']
 
@@ -24,7 +25,7 @@ class MurelNet(nn.Module):
                                           config['fusion'])
 
         self.buffer = None
-        self.final_fusion = factory_fusion(config['fusion']['final_fusion'])
+        self.final_fusion = self.fusion_factory.create_fusion(config['fusion']['final_fusion'])
         self.unroll_steps = config['unroll_steps']
         self.log_softmax = nn.LogSoftmax(dim=1)
         self.txt_enc = get_text_enc(config, word_vocabulary)

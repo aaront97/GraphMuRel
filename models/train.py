@@ -15,7 +15,7 @@ from evaluation.eval_vqa import VQA_Evaluator
 import json
 import argparse
 import numpy as np
-from models.factory.factory_model import factory_model, factory_config
+from models.factory.ModelFactory import ModelFactory
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model_type',
@@ -24,7 +24,7 @@ args = parser.parse_args()
 
 
 
-def create_summary_writer(model, loader, logdir):
+def create_tsbd_summary_writer(model, loader, logdir):
     batch = next(iter(loader))
     writer = SummaryWriter(logdir=logdir)
     try:
@@ -35,7 +35,7 @@ def create_summary_writer(model, loader, logdir):
     return writer
 
 
-def get_model_directory(config, chosen_keys):
+def get_model_summary_name(config, chosen_keys):
     res = config['name']
     for key in chosen_keys:
         res += "_{}_{}".format(key, config[key])
@@ -148,7 +148,7 @@ def load_checkpoint(file_name, model, optimizer):
     epoch_since_best = state['epoch_since_best']
     return model, optimizer, epoch, epoch_since_best
 
-def get_max_accuracy(checkpoint_file_name, best_model_file_name):
+def get_max_accuracy_from_ckpt(checkpoint_file_name, best_model_file_name):
     res = -1
     if os.path.exists(checkpoint_file_name):
         res = max(torch.load(checkpoint_file_name)['accuracy'], res)
@@ -193,8 +193,9 @@ def set_seed(seed):
     random.seed(seed)
 
 
-def run():
-    config = factory_config(args.model_type)
+def train():
+    model_factory = ModelFactory()
+    config = model_factory.create_config(args.model_type)
     config['RESULTS_FILE_PATH'] = config['RESULTS_FILE_PATH'].format(config['name'])
     set_seed(config['seed'])
     ROOT_DIR = config['ROOT_DIR']
@@ -246,7 +247,7 @@ def run():
     word_vocabulary = [word for _, word in train_dataset.word_to_wid.items()]
 
     # Build model
-    model = factory_model(args.model_type, config, word_vocabulary)
+    model = model_factory.create_model(args.model_type, config, word_vocabulary)
 
     # Transfer model to GPU
     model = model.cuda()
@@ -270,8 +271,7 @@ def run():
 
     max_accuracy = -1
     if config['checkpoint_option'] == 'resume_last' and (os.path.exists(best_model_file_name) or os.path.exists(checkpoint_file_name)):
-        max_accuracy = get_max_accuracy(
-                checkpoint_file_name, best_model_file_name)
+        max_accuracy = get_max_accuracy_from_ckpt(checkpoint_file_name, best_model_file_name)
 
     # model, optimizer, start_epoch, max_accuracy =
     # load_checkpoint(config, model, optimizer)
@@ -398,4 +398,4 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    train()

@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from fusion_net.factory.factory_fusion import factory_fusion
+from fusion.factory.FusionFactory import FusionFactory
 from torch_geometric.nn import GCNConv,GATConv, global_max_pool
 
 class GraphCell(nn.Module):
@@ -27,8 +27,9 @@ class GraphCell(nn.Module):
   
     def __init__(self, in_channels, out_channels, config):
         super(GraphCell, self).__init__()
+        self.fusion_factory = FusionFactory()
         fusion_features_cfg = config['obj_features_question']
-        self.fusion_features = factory_fusion(fusion_features_cfg)
+        self.fusion_features = self.fusion_factory.create_fusion(fusion_features_cfg)
         self.gcn1 = GCNConv(in_channels, 1024)
         self.gcn2 = GCNConv(1024, 512)
         self.gcn3 = GCNConv(512, 256)

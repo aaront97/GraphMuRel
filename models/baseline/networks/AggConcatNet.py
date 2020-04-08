@@ -3,20 +3,19 @@ import torch.nn as nn
 from dataset.auxiliary_functions import masked_softmax
 from dataset.TextEncFactory import get_text_enc
 from models.baseline.networks.ConcatMLP import ConcatMLP
-from fusion_net.factory.factory_fusion import factory_fusion
+from fusion.factory.FusionFactory import FusionFactory
 
 
 class AggConcatNet(nn.Module):
     def __init__(self, config, word_vocabulary):
         super(AggConcatNet, self).__init__()
-
+        self.fusion_factory = FusionFactory()
         self.agg_type = config['agg_type']
         self.q_self_attention = config['q_self_attention']
         if config['fusion_type'] == 'concat_mlp':
             self.fusion = ConcatMLP(config['fusion_mlp'])
         elif config['fusion_type'] == 'block':
-            self.fusion = factory_fusion(
-                    config['fusion_block'])
+            self.fusion = self.fusion_factory.create_fusion(config['fusion_block'])
         else:
             raise ValueError('Unimplemented attention fusion')
 

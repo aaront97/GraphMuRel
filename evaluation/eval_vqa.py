@@ -18,7 +18,7 @@ class VQA_Evaluator:
         self.dataType = dataType
         self.dataSubType = dataSubType
         self.annFile = '%s/Annotations/%s%s_%s_annotations.json'%(dataDir, versionType, dataType, dataSubType)
-        self.quesFile    ='%s/Questions/%s%s_%s_%s_questions.json'%(dataDir, versionType, taskType, dataType, dataSubType)
+        self.quesFile='%s/Questions/%s%s_%s_%s_questions.json'%(dataDir, versionType, taskType, dataType, dataSubType)
         self.vqa = VQA(self.annFile, self.quesFile)
         
     def evaluate(self, resFile, epoch):
@@ -46,4 +46,3 @@ class VQA_Evaluator:
         print("\n")
         return float(vqaEval.accuracy['overall'])
         
-       

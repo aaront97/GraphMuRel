@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
-from fusion_net.factory.factory_fusion import factory_fusion
+from fusion.factory.FusionFactory import FusionFactory
 from dataset.auxiliary_functions import get_aggregation_func, masked_softmax
 
 
 class MurelCell(nn.Module):
     def __init__(self, config):
         super(MurelCell, self).__init__()
+        self.fusion_factory = FusionFactory()
         fusion_features_cfg = config['fusion']['obj_features_question']
         fusion_box_cfg = config['fusion']['box']
         fusion_fused_cfg = config['fusion']['obj_features_obj_features']
@@ -24,9 +25,9 @@ class MurelCell(nn.Module):
             self.murel_cell_attention = False
 
         self.buffer = None
-        self.fusion_features = factory_fusion(fusion_features_cfg)
-        self.fusion_box = factory_fusion(fusion_box_cfg)
-        self.fusion_fused = factory_fusion(fusion_fused_cfg)
+        self.fusion_features = self.fusion_factory.create_fusion(fusion_features_cfg)
+        self.fusion_box = self.fusion_factory.create_fusion(fusion_box_cfg)
+        self.fusion_fused = self.fusion_factory.create_fusion(fusion_fused_cfg)
         self.pairwise_agg = get_aggregation_func(config['pairwise_agg'], dim=2)
 
     def initialise_buffers(self):
