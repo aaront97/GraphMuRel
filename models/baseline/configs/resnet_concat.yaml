@@ -1,0 +1,34 @@
+name: resnet_concat
+checkpoint_option: best  #can be best, fresh, or resume_last
+checkpoint_dir: '/auto/homes/bat34/VQA_PartII/models/networks/baseline/trained_models' #'/local/scratch/bat34/baseline_trained_models'
+ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
+bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
+skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
+processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/'
+include_keys: ['seed',
+               'txt_enc',
+               'batch_size',
+               'lr',
+               ]
+vqa_dir: '/auto/homes/bat34/VQA'
+dropout: 0.2
+txt_enc: BayesianUniSkip
+batch_size: 256
+loss_function: 'NLLLoss' # can be soft_cross_entropy or NLLLoss, remember to change RESULTS_FILE_PATH
+RESULTS_FILE_PATH: '/auto/homes/bat34/VQA_PartII/models/baseline/{}-temp.json'
+grad_clip: 0.25
+lr: 0.0003
+epochs: 25
+checkpoint_every: 1
+reduction_factor: 8
+num_workers: 12
+seed: 2048
+log_every: 50
+gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
+lr_decay_epochs: [14, 24, 2] #range
+lr_decay_rate: .25
+fusion_mlp:
+    input_dims: [2400, 2048]
+    out_dim: 3000
+    dropout: 0.2
+    hidden_list: [3200, 3200]
