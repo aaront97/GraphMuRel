@@ -2,6 +2,7 @@ import yaml
 from models.murel.networks.MurelNet import MurelNet
 from models.baseline.networks.AttentionNet import AttentionNet
 from models.baseline.networks.AggConcatNet import AggConcatNet
+from models.baseline.networks.ResnetConcat import ResnetConcat
 
 
 class ModelFactory:
@@ -13,7 +14,7 @@ class ModelFactory:
         elif model_name == 'frcnn_concat':
             return AggConcatNet(config, word_vocabulary)
         elif model_name == 'resnet_concat':
-            raise ValueError('Resnet Concat API not implemented')
+            return
         else:
             raise ValueError()
 
@@ -33,6 +34,8 @@ class ModelFactory:
                 config = yaml.load(f)
             return config
         elif model_name == 'resnet_concat':
-            raise ValueError('Resnet Concat API not implemented')
+            with open(ROOT_DIR.format('baseline/configs/resnet_concat.yaml')) as f:
+                config = yaml.load(f)
+            return config
         else:
-            raise ValueError()
+            raise ValueError('Unrecognised model name. Please choose one of murel, attention, frcnn_concat, or resnet_concat')

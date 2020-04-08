@@ -19,7 +19,8 @@ class VQAv2Dataset(AbstractVQADataset):
                  sample_answers=False,
                  skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts',
                  include_graph_data=True,
-                 graph_type='knn'
+                 graph_type='knn',
+                 resnet_features='/local/scratch/bat34/resnet101-features-2048'
                  ):
         super(VQAv2Dataset, self).__init__(
                  processed_dir=processed_dir,
@@ -29,6 +30,7 @@ class VQAv2Dataset(AbstractVQADataset):
                  sample_answers=sample_answers,
                  skipthoughts_dir=skipthoughts_dir,
                  split=split)
+        self.resnet_features = resnet_features
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
         self.include_graph_data = include_graph_data
@@ -66,6 +68,9 @@ class VQAv2Dataset(AbstractVQADataset):
         image_name = question['image_name']
         dict_features = torch.load(
                 os.path.join(self.bottom_up_features_dir, image_name) + '.pth')
+        resnet_feat = torch.load(
+            os.path.join(self.resnet_features, image_name) + '.pth')
+        item['resnet_features'] = resnet_feat
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
         if self.graph_dir:
