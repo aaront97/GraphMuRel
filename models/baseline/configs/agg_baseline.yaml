@@ -1,8 +1,8 @@
-name: agg_concat_min
-agg_type: min
-q_self_attention: True
-checkpoint_option: fresh  #can be best, fresh, or resume_last
-checkpoint_dir: '/local/scratch/bat34/baseline_trained_models'
+name: agg_concat_max
+agg_type: max
+q_self_attention: False
+checkpoint_option: best  #can be best, fresh, or resume_last
+checkpoint_dir: '/auto/homes/bat34/VQA_PartII/models/networks/baseline/trained_models' #'/local/scratch/bat34/baseline_trained_models'
 ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
 bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
@@ -35,7 +35,7 @@ lr_decay_rate: .25
 fusion_type: concat_mlp
 fusion_block:
     type: block
-    input_dims: [4800, 2048]
+    input_dims: [2400, 2048]
     output_dims: 3000
     dropout_prelin: 0.
     dropout_input: 0.1
@@ -43,7 +43,7 @@ fusion_block:
     rank: 15
     mm_dim: 1000
 fusion_mlp:
-    input_dims: [4800, 2048]
+    input_dims: [2400, 2048]
     out_dim: 3000
     dropout: 0.2
     hidden_list: [3200, 3200]

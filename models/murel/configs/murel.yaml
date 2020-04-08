@@ -1,7 +1,7 @@
 name: murel_dropout #murel_dropout #murel_cell_attention
 checkpoint_option: resume_last #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
-checkpoint_dir: '/auto/homes/bat34/VQA_PartII/models/murel/trained_models' # '/local/scratch/bat34/murel_trained_models'
+checkpoint_dir: '/local/scratch/bat34/murel_trained_models' #'/auto/homes/bat34/VQA_PartII/models/murel/trained_models'
 bottom_up_features_dir: '/auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
@@ -23,7 +23,7 @@ pairwise_agg: 'max' #Remember to change fusion's pairwise_agg too
 RESULTS_FILE_PATH: '/auto/homes/bat34/VQA_PartII/models/murel/{}.json'
 loss_function: 'NLLLoss' # can be soft_cross_entropy or NLLLoss, remember to change RESULTS_FILE_PATH
 batch_size: 256
-reduction_factor: 16
+reduction_factor: 8
 grad_clip: 0.25
 lr: 0.0003 #orig 0.0006
 gradual_warmup_steps: [0.5, 2.0, 7.0]  #[1.0, 4.0, 7.0] #torch.linspace
@@ -35,7 +35,7 @@ num_workers: 4
 load_last_epoch: True
 unroll_steps: 3
 log_every: 50
-seed: 2048
+seed: 6969
 fusion_type: block
 use_graph_module: False
 use_pairwise: True

@@ -46,6 +46,7 @@ class VQAv2Dataset(AbstractVQADataset):
         else:
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
+                transforms.Pad1DTensors(dict_keys=['question_ids']),
                 transforms.BatchGraph(),
                 transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn

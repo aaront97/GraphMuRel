@@ -19,16 +19,17 @@ class ModelFactory:
 
 
     def create_config(self, model_name):
+        ROOT_DIR = '/auto/homes/bat34/VQA_PartII/models/{}'
         if model_name == 'murel':
-            with open('murel/configs/murel.yaml') as f:
+            with open(ROOT_DIR.format('murel/configs/murel.yaml')) as f:
                 config = yaml.load(f)
             return config
         elif model_name == 'attention':
-            with open('baseline/configs/attention_baseline.yaml') as f:
+            with open(ROOT_DIR.format('baseline/configs/attention_baseline.yaml')) as f:
                 config = yaml.load(f)
             return config
         elif model_name == 'frcnn_concat':
-            with open('baseline/configs/agg_baseline.yaml') as f:
+            with open(ROOT_DIR.format('baseline/configs/agg_baseline.yaml')) as f:
                 config = yaml.load(f)
             return config
         elif model_name == 'resnet_concat':
