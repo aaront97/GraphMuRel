@@ -30,7 +30,7 @@ class VQAv2Dataset(AbstractVQADataset):
                  sample_answers=sample_answers,
                  skipthoughts_dir=skipthoughts_dir,
                  split=split)
-        self.resnet_features = resnet_features
+        self.resnet_features_dir = resnet_features
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
         self.include_graph_data = include_graph_data
@@ -41,7 +41,8 @@ class VQAv2Dataset(AbstractVQADataset):
         if self.split == 'train':
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
-                transforms.Pad1DTensors(dict_keys=['question_ids', 'id_unique', 'id_weights']),
+                transforms.Pad1DTensors(dict_keys=['question_ids']),
+                #transforms.Pad1DTensors(dict_keys=['question_ids', 'id_unique', 'id_weights']),
                 transforms.BatchGraph(),
                 transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
@@ -68,20 +69,21 @@ class VQAv2Dataset(AbstractVQADataset):
         image_name = question['image_name']
         dict_features = torch.load(
                 os.path.join(self.bottom_up_features_dir, image_name) + '.pth')
-        resnet_feat = torch.load(
-            os.path.join(self.resnet_features, image_name) + '.pth')
-        item['resnet_features'] = resnet_feat
+        #if self.split == 'test':
+        #    resnet_feat = torch.load(
+        #        os.path.join(self.resnet_features_dir, image_name) + '.pth')
+        #    item['resnet_features'] = resnet_feat
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
-        if self.graph_dir:
-            graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
-            item['graph'] = torch.load(graph_img_name)
-        if self.split != 'test':
-            annotation = self.dataset['annotations'][idx]
-            item['answer_id'] = torch.LongTensor([annotation['answer_id']])
-            item['answer'] = annotation['most_frequent_answer']
-            item['question_type'] = annotation['question_type']
-        if self.split == 'train':
-            item['id_weights'] = annotation['id_weights']
-            item['id_unique'] = annotation['id_unique']
+        #if self.graph_dir:
+        #    graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
+        #    item['graph'] = torch.load(graph_img_name)
+        #if self.split != 'test':
+        annotation = self.dataset['annotations'][idx]
+        item['answer_id'] = torch.LongTensor([annotation['answer_id']])
+        item['answer'] = annotation['most_frequent_answer']
+        item['question_type'] = annotation['question_type']
+        #if self.split == 'train':
+        #    item['id_weights'] = annotation['id_weights']
+        #    item['id_unique'] = annotation['id_unique']
         return item

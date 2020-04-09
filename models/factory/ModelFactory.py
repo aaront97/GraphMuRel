@@ -14,7 +14,7 @@ class ModelFactory:
         elif model_name == 'frcnn_concat':
             return AggConcatNet(config, word_vocabulary)
         elif model_name == 'resnet_concat':
-            return
+            return ResnetConcat(config, word_vocabulary)
         else:
             raise ValueError()
 

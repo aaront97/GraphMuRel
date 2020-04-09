@@ -245,8 +245,12 @@ def train():
 
     # Construct word vocabulary
     # !!!!!!!!!!!
-    word_vocabulary = [word for word, _ in train_dataset.word_to_wid.items()]
-
+    word_vocabulary = [train_dataset.wid_to_word[i] for i in range(1, len(train_dataset.wid_to_word) + 1)]
+    if os.path.exists('/local/scratch/bat34/temp_words.pth'):
+       x = torch.load('/local/scratch/bat34/temp_words.pth')
+       assert word_vocabulary == x
+       print('word vocabs are the same!')
+    torch.save(word_vocabulary, '/local/scratch/bat34/temp_words.pth')
     # Build model
     model = model_factory.create_model(args.model_type, config, word_vocabulary)
 
@@ -310,8 +314,8 @@ def train():
                     'bounding_boxes': data['bounding_boxes'].cuda(),
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
                     'question_lengths': data['question_lengths'].cuda(),
-                    'id_unique': data['id_unique'].cuda(),
-                    'id_weights': data['id_weights'].cuda()
+                    #'id_unique': data['id_unique'].cuda(),
+                    #'id_weights': data['id_weights'].cuda()
             }
 
             if 'murel' in config['name'] and config['use_graph_module']:

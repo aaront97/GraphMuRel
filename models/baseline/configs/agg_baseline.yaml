@@ -1,10 +1,10 @@
-name: agg_concat_max
-agg_type: max
+name: agg_concat_min_corrected_wid
+agg_type: mean
 q_self_attention: True
 checkpoint_option: fresh  #can be best, fresh, or resume_last
 checkpoint_dir:  '/local/scratch/bat34/baseline_trained_models'
 ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
-bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
+bottom_up_features_dir: /local/scratch/bat34/2018-04-27_bottom-up-attention_fixed_36/
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/'
 include_keys: ['seed',
@@ -26,7 +26,7 @@ lr: 0.0003
 epochs: 25
 checkpoint_every: 1
 reduction_factor: 8
-num_workers: 12
+num_workers: 4
 seed: 2048
 log_every: 50
 gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
