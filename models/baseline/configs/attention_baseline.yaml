@@ -25,13 +25,14 @@ lr: 0.0003
 epochs: 25
 checkpoint_every: 1
 reduction_factor: 8
-num_workers: 4
+num_workers: 8
 log_every: 50
 gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 hidden_list: [1600, 1600]
-attention_fusion_type: block #block or concat_mlp
+attention_fusion_type: block
+#attention_fusion_type: concat_mlp #block or concat_mlp
 attention_fusion_block:
     type: block
     input_dims: [4800, 2048]
@@ -47,6 +48,7 @@ attention_fusion_mlp:
     dropout: 0.2
     hidden_list: [1600, 1600]
 final_fusion_type: block
+#final_fusion_type: concat_mlp
 final_fusion_block:
     type: block
     input_dims: [4800, 4096]

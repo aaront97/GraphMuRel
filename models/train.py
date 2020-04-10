@@ -277,6 +277,8 @@ def train():
     max_accuracy = -1
     if config['checkpoint_option'] == 'resume_last' and (os.path.exists(best_model_file_name) or os.path.exists(checkpoint_file_name)):
         max_accuracy = get_max_accuracy_from_ckpt(checkpoint_file_name, best_model_file_name)
+    if config['checkpoint_option'] == 'best':
+        max_accuracy = torch.load(best_model_file_name)['accuracy']
 
     # model, optimizer, start_epoch, max_accuracy =
     # load_checkpoint(config, model, optimizer)
