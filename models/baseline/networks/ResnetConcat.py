@@ -1,6 +1,6 @@
 import torch.nn as nn
-from dataset.TextEncFactory import get_text_enc
-from models.baseline.networks.ConcatMLP import ConcatMLP
+from models.text_encoders.SkipthoughtsFactory import get_text_enc
+from fusion.networks.ConcatMLP import ConcatMLP
 
 
 class ResnetConcat(nn.Module):

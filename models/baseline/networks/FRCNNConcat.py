@@ -1,14 +1,14 @@
 import torch
 import torch.nn as nn
-from dataset.auxiliary_functions import masked_softmax
-from dataset.TextEncFactory import get_text_enc
-from models.baseline.networks.ConcatMLP import ConcatMLP
+from transforms.transforms import masked_softmax
+from models.text_encoders.SkipthoughtsFactory import get_text_enc
+from fusion.networks.ConcatMLP import ConcatMLP
 from fusion.factory.FusionFactory import FusionFactory
 
 
-class AggConcatNet(nn.Module):
+class FRCNNConcat(nn.Module):
     def __init__(self, config, word_vocabulary):
-        super(AggConcatNet, self).__init__()
+        super(FRCNNConcat, self).__init__()
         self.fusion_factory = FusionFactory()
         self.agg_type = config['agg_type']
         self.q_self_attention = config['q_self_attention']

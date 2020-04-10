@@ -4,8 +4,9 @@ import torch.nn as nn
 from fusion.factory.FusionFactory import FusionFactory
 from models.murel.networks.MurelCell import MurelCell
 from models.murel.networks.GraphCell import GraphCell
-from dataset.TextEncFactory import get_text_enc
-from dataset.auxiliary_functions import masked_softmax, get_aggregation_func
+from models.text_encoders.SkipthoughtsFactory import get_text_enc
+from models.factory.ModelFactory import get_aggregation_func
+from transforms.transforms import masked_softmax
 from torch_geometric.nn import global_max_pool
 from copy import deepcopy
 

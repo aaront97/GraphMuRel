@@ -11,7 +11,7 @@ import tqdm
 import subprocess
 from schedulers.schedulers import LR_List_Scheduler
 from loss_functions.loss_functions import soft_cross_entropy
-from evaluation.eval_vqa import VQA_Evaluator
+from evaluation.VQA_Evaluator import VQA_Evaluator
 import json
 import argparse
 import numpy as np
