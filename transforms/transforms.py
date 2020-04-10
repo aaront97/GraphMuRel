@@ -83,3 +83,12 @@ class StackTensors:
         return batch
 
 
+def masked_softmax(x, lengths):
+    max_length = x.size(1)
+    indices = torch.arange(max_length).to(device=x.device)
+    indices = indices[None, :, None].expand_as(x)
+    lengths_expand = lengths.unsqueeze(2).expand_as(x)
+    mask = indices < lengths_expand
+    x[~mask] = float('-inf')
+    x = torch.softmax(x, dim=1)
+    return x

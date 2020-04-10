@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from dataset.auxiliary_functions import masked_softmax
-from dataset.TextEncFactory import get_text_enc
-from models.baseline.networks.ConcatMLP import ConcatMLP
+from transforms.transforms import masked_softmax
+from models.text_encoders.SkipthoughtsFactory import get_text_enc
+from fusion.networks.ConcatMLP import ConcatMLP
 from fusion.factory.FusionFactory import FusionFactory
 
 

@@ -2,7 +2,8 @@
 import torch
 import torch.nn as nn
 from fusion.factory.FusionFactory import FusionFactory
-from dataset.auxiliary_functions import get_aggregation_func, masked_softmax
+from models.factory.ModelFactory import get_aggregation_func
+from transforms.transforms import masked_softmax
 
 
 class MurelCell(nn.Module):

@@ -1,11 +1,31 @@
 # -*- coding: utf-8 -*-
 import pytest
 from dataset.VQAv2Dataset import VQAv2Dataset
-from dataset.auxiliary_functions import tokenize
 import yaml
 from torch.utils.data import DataLoader
 import os
+import re
 
+
+def standardise(s):
+    s = s.lower()
+    s = s.rstrip()
+    for i in [r'\?',r'\!',r'\'',r'\"',r'\$',r'\:',r'\@',r'\(',r'\)',r'\,',r'\.',r'\;']:
+        s = re.sub(i, '', s)
+    return s
+
+
+def tokenize(self, s):
+    # we don't replace # because # is used to refer to number of items
+    # Tokenizing code taken from Cadene
+    t_str = standardise(s)
+
+    for i in [r'\-',r'\/']:
+        t_str = re.sub( i, ' ', t_str)
+
+    q_list = re.sub(r'\?','',t_str.lower()).split(' ')
+    q_list = list(filter(lambda x: len(x) > 0, q_list))
+    return q_list
 
 @pytest.fixture(scope='session')
 def config():
