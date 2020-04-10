@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 from fusion.factory.FusionFactory import FusionFactory
-from models.factory.ModelFactory import get_aggregation_func
+from models.factory.GetAggFunc import get_aggregation_func
 from transforms.transforms import masked_softmax
 
 
