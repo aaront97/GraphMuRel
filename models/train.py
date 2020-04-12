@@ -57,7 +57,10 @@ def val_evaluate(config, model, epoch, val_loader,
                     'object_features_list': data['object_features_list'].cuda(),
                     'bounding_boxes': data['bounding_boxes'].cuda(),
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
-                    'question_lengths': data['question_lengths'].cuda()
+                    'question_lengths': data['question_lengths'].cuda(),
+                    #'resnet_features': data['resnet_features'].cuda(),
+                    #'id_unique': data['id_unique'].cuda(),
+                    #'id_weights': data['id_weights'].cuda()
             }
 
             if 'murel' in config['name'] and config['use_graph_module']:
@@ -316,6 +319,7 @@ def train():
                     'bounding_boxes': data['bounding_boxes'].cuda(),
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
                     'question_lengths': data['question_lengths'].cuda(),
+                    #'resnet_features': data['resnet_features'].cuda(),
                     #'id_unique': data['id_unique'].cuda(),
                     #'id_weights': data['id_weights'].cuda()
             }
@@ -397,8 +401,8 @@ def train():
         if ((epoch + 1) % config['checkpoint_every']) == 0 or isBest:
             save_checkpoint(state, info)
 
-        if epoch_since_best == 4:
-            print('No improvement over 4 epochs. Early stopping...')
+        if epoch_since_best == 5:
+            print('No improvement over 5 epochs. Early stopping...')
             break
 
 

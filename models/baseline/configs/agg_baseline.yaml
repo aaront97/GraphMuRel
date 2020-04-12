@@ -1,6 +1,6 @@
-name: agg_concat_sum_corrected_wid
-agg_type: sum
-q_self_attention: False
+name: agg_concat_max_corrected_wid
+agg_type: max
+q_self_attention: True
 checkpoint_option: fresh  #can be best, fresh, or resume_last
 checkpoint_dir:  '/local/scratch/bat34/baseline_trained_models'
 ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
@@ -27,7 +27,7 @@ epochs: 25
 checkpoint_every: 1
 reduction_factor: 8
 num_workers: 4
-seed: 2048
+seed: 1337
 log_every: 50
 gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range
@@ -35,7 +35,7 @@ lr_decay_rate: .25
 fusion_type: concat_mlp
 fusion_block:
     type: block
-    input_dims: [2400, 2048]
+    input_dims: [4800, 2048]
     output_dims: 3000
     dropout_prelin: 0.
     dropout_input: 0.1
@@ -43,7 +43,7 @@ fusion_block:
     rank: 15
     mm_dim: 1000
 fusion_mlp:
-    input_dims: [2400, 2048]
+    input_dims: [4800, 2048]
     out_dim: 3000
     dropout: 0.2
     hidden_list: [3200, 3200]

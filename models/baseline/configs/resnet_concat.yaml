@@ -1,5 +1,5 @@
 name: resnet_concat
-checkpoint_option: fresh  #can be best, fresh, or resume_last
+checkpoint_option: resume_last #can be best, fresh, or resume_last
 checkpoint_dir: '/local/scratch/bat34/baseline_trained_models'
 ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
 bottom_up_features_dir: /auto/homes/bat34/2018-04-27_bottom-up-attention_fixed_36/
@@ -20,7 +20,7 @@ grad_clip: 0.25
 lr: 0.0003
 epochs: 25
 checkpoint_every: 1
-reduction_factor: 8
+reduction_factor: 32
 num_workers: 12
 seed: 2048
 log_every: 50

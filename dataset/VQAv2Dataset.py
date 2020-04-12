@@ -69,10 +69,9 @@ class VQAv2Dataset(AbstractVQADataset):
         image_name = question['image_name']
         dict_features = torch.load(
                 os.path.join(self.bottom_up_features_dir, image_name) + '.pth')
-        #if self.split == 'test':
-        #    resnet_feat = torch.load(
+        #resnet_feat = torch.load(
         #        os.path.join(self.resnet_features_dir, image_name) + '.pth')
-        #    item['resnet_features'] = resnet_feat
+        #item['resnet_features'] = torch.squeeze(resnet_feat)
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
         #if self.graph_dir:
