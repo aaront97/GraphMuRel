@@ -5,6 +5,7 @@ from transforms.transforms import masked_softmax
 from models.text_encoders.SkipthoughtsFactory import get_text_enc
 from fusion.networks.ConcatMLP import ConcatMLP
 from fusion.factory.FusionFactory import FusionFactory
+from copy import deepcopy
 
 
 class AttentionNet(nn.Module):
@@ -25,7 +26,7 @@ class AttentionNet(nn.Module):
             self.final_fusion = self.fusion_factory.create_fusion(config['final_fusion_block'])
         else:
             raise ValueError('Unimplemented final fusion')
-
+        self.buffer = None
         self.txt_enc = get_text_enc(config, word_vocabulary)
         self.q_linear0 = nn.Linear(
                 config['q_att']['q_linear0']['input_dim'],
@@ -41,6 +42,10 @@ class AttentionNet(nn.Module):
                 config['obj_att']['obj_linear1']['input_dim'],
                 config['obj_att']['obj_linear1']['output_dim'])
         self.log_softmax = nn.LogSoftmax(dim=1)
+
+    def initialise_buffers(self):
+        self.buffer = {}
+        print('Buffer initialised. Model ready to visualise.')
 
     def forward(self, item):
         question_ids = item['question_ids']
@@ -80,8 +85,10 @@ class AttentionNet(nn.Module):
 
         glimpses = torch.unbind(fused_att, dim=2)
         attentioned_glimpses = []
-        for glimpse in glimpses:
+        for i, glimpse in enumerate(glimpses):
             glimpse = glimpse.unsqueeze(2).expand(-1, -1, object_features_list.size(-1))
+            if self.buffer is not None:
+                self.buffer['glimpse' + str(i)] = glimpse.data().cpu()
             attentioned_feature = object_features_list * glimpse
             attentioned_feature = torch.sum(attentioned_feature, dim=1)
             attentioned_glimpses.append(attentioned_feature)

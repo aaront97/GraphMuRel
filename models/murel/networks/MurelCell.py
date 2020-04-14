@@ -67,17 +67,18 @@ class MurelCell(nn.Module):
                         .contiguous().view(batch_size * num_obj * num_obj, -1)
                 ]
                 )
-        relations = relations.view(batch_size, num_obj, num_obj, -1)
+        relations = relations.view(batch_size, num_obj, num_obj, -1)  # BS x 36 x 2048 x 2048
         if self.murel_cell_attention:
             e_hat = self.compute_relation_attention(relations)
         else:
-            e_hat = self.pairwise_agg(relations)
-
-
+            e_hat = self.pairwise_agg(relations)  # BS x 36 x 2048
 
         res = fused_features + e_hat
         if self.buffer is not None:
             _, argmax = torch.max(res, dim=1)
+            l2_norm = torch.norm(e_hat / res, dim=2)  # BS x 36
+            self.buffer['i_hat'] = torch.max(l2_norm, dim=1)[1].data.cpu()  # BS
+            self.buffer['relations'] = relations.data.cpu()
             self.buffer['argmax'] = argmax.data.cpu()
         return res
 
