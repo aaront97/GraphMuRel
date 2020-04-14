@@ -20,9 +20,9 @@ grad_clip: 0.25
 lr: 0.0003
 epochs: 25
 checkpoint_every: 1
-reduction_factor: 32
-num_workers: 12
-seed: 2048
+reduction_factor: 64
+num_workers: 8
+seed: 1337
 log_every: 50
 gradual_warmup_steps: [1.0, 4.0, 7.0] #torch.linspace
 lr_decay_epochs: [14, 24, 2] #range

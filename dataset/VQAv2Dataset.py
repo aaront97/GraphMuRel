@@ -77,11 +77,11 @@ class VQAv2Dataset(AbstractVQADataset):
         #if self.graph_dir:
         #    graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
         #    item['graph'] = torch.load(graph_img_name)
-        #if self.split != 'test':
-        annotation = self.dataset['annotations'][idx]
-        item['answer_id'] = torch.LongTensor([annotation['answer_id']])
-        item['answer'] = annotation['most_frequent_answer']
-        item['question_type'] = annotation['question_type']
+        if self.split != 'test':
+            annotation = self.dataset['annotations'][idx]
+            item['answer_id'] = torch.LongTensor([annotation['answer_id']])
+            item['answer'] = annotation['most_frequent_answer']
+            item['question_type'] = annotation['question_type']
         #if self.split == 'train':
         #    item['id_weights'] = annotation['id_weights']
         #    item['id_unique'] = annotation['id_unique']
