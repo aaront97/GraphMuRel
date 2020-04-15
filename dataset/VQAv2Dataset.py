@@ -19,7 +19,7 @@ class VQAv2Dataset(AbstractVQADataset):
                  sample_answers=False,
                  skipthoughts_dir='/auto/homes/bat34/VQA_PartII/data/skipthoughts',
                  include_graph_data=True,
-                 graph_type='knn',
+                 graph_type='knn6',
                  resnet_features='/local/scratch/bat34/resnet101-features-2048'
                  ):
         super(VQAv2Dataset, self).__init__(
@@ -34,9 +34,13 @@ class VQAv2Dataset(AbstractVQADataset):
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
         self.include_graph_data = include_graph_data
-        if graph_type == 'knn':
-            self.graph_dir = '/auto/homes/bat34/VQA_PartII/' + \
-                             'data/preprocessed_graphs_knn_neighbours_6/'
+
+
+        if graph_type.startswith('knn'):
+            no_neigh = int(graph_type.lstrip('knn'))
+            print('You have picked nearest-neighbour graphs, with N = {}'.format(no_neigh))
+            self.graph_dir = '/local/scratch/bat34/graphs' + \
+                             'graphs/preprocessed_graphs_knn_neighbours_{}/'.format(no_neigh)
 
         if self.split == 'train':
             self.collate_fn = transforms.Compose([
@@ -74,9 +78,9 @@ class VQAv2Dataset(AbstractVQADataset):
         #item['resnet_features'] = torch.squeeze(resnet_feat)
         item['bounding_boxes'] = dict_features['norm_rois']
         item['object_features_list'] = dict_features['pooled_feat']
-        #if self.graph_dir:
-        #    graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
-        #    item['graph'] = torch.load(graph_img_name)
+        if self.graph_dir:
+            graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
+            item['graph'] = torch.load(graph_img_name)
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])

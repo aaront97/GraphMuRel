@@ -19,7 +19,8 @@ from models.factory.ModelFactory import ModelFactory
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model_type',
-                    help="specify the model you'd like to train, options: murel, agg_concat, attention, resnet_concat")
+                    help="specify the model you'd like to train, options: murel, agg_concat, attention, resnet_concat,"
+                         "graph_conv")
 args = parser.parse_args()
 
 
@@ -219,7 +220,8 @@ def train():
             skipthoughts_dir=config['skipthoughts_dir'],
             processed_dir=config['processed_dir'],
             ROOT_DIR=ROOT_DIR,
-            vqa_dir=config['vqa_dir'])
+            vqa_dir=config['vqa_dir'],
+            graph_type=config['graph']['graph_type'])
     val_dataset = VQAv2Dataset(
             split="val",
             txt_enc=config['txt_enc'],
@@ -227,7 +229,8 @@ def train():
             skipthoughts_dir=config['skipthoughts_dir'],
             processed_dir=config['processed_dir'],
             ROOT_DIR=ROOT_DIR,
-            vqa_dir=config['vqa_dir'])
+            vqa_dir=config['vqa_dir'],
+            graph_type=config['graph']['graph_type'])
 
     # https://gist.github.com/thomwolf/ac7a7da6b1888c2eeac8ac8b9b05d3d3
     reduction_factor = config['reduction_factor']

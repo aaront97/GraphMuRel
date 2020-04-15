@@ -15,6 +15,8 @@ class ModelFactory:
             return FRCNNConcat(config, word_vocabulary)
         elif model_name == 'resnet_concat':
             return ResnetConcat(config, word_vocabulary)
+        elif model_name == 'graph_conv':
+            return MurelNet(config, word_vocabulary)
         else:
             raise ValueError()
 
@@ -35,6 +37,10 @@ class ModelFactory:
             return config
         elif model_name == 'resnet_concat':
             with open(ROOT_DIR.format('baseline/configs/resnet_concat.yaml')) as f:
+                config = yaml.load(f)
+            return config
+        elif model_name == 'graph_conv':
+            with open(ROOT_DIR.format('murel/configs/graph_conv.yaml')) as f:
                 config = yaml.load(f)
             return config
         else:

@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from fusion.factory.FusionFactory import FusionFactory
-from torch_geometric.nn import GCNConv,GATConv, global_max_pool
+from torch_geometric.nn import GCNConv
 
 class GraphCell(nn.Module):
     def fuse_object_features_with_questions(self,
@@ -12,27 +12,26 @@ class GraphCell(nn.Module):
                                             batch_size,
                                             num_obj):
 
-#        res = self.fusion_features([
-#            question_embedding,
-#            object_features_list.contiguous().view(batch_size * num_obj, -1),
-#        ])
         
         res = self.fusion_features([
                 question_embedding,
                 object_features_list
                 ])
-        
-        #res = res.view(batch_size, num_obj, -1)
+
         return res
   
     def __init__(self, in_channels, out_channels, config):
         super(GraphCell, self).__init__()
         self.fusion_factory = FusionFactory()
-        fusion_features_cfg = config['obj_features_question']
+        fusion_features_cfg = config['fusion']['obj_features_question']
         self.fusion_features = self.fusion_factory.create_fusion(fusion_features_cfg)
-        self.gcn1 = GCNConv(in_channels, 1024)
-        self.gcn2 = GCNConv(1024, 512)
-        self.gcn3 = GCNConv(512, 256)
+        graph_cfg = config['graph']
+        self.gcn1 = GCNConv(graph_cfg['gcn1']['input_dim'],
+                            graph_cfg['gcn1']['output_dim'])
+        self.gcn2 = GCNConv(graph_cfg['gcn2']['input_dim'],
+                            graph_cfg['gcn2']['output_dim'])
+        self.gcn3 = GCNConv(graph_cfg['gcn3']['input_dim'],
+                            graph_cfg['gcn3']['output_dim'])
 
     def forward(self,
                 question_embedding,
@@ -59,6 +58,4 @@ class GraphCell(nn.Module):
         x = x + fused_question_object
         x = F.relu(x)
         x = self.gcn3(x, edge_index)
-        # x = x + fused_question_object
-        #x = global_max_pool(x, batch)
         return x
