@@ -1,5 +1,5 @@
-name: agg_concat_max_corrected_wid
-agg_type: max
+name: agg_concat_min_corrected_wid
+agg_type: min
 q_self_attention: False
 checkpoint_option: resume_last  #can be best, fresh, or resume_last
 checkpoint_dir:  '/local/scratch/bat34/baseline_trained_models'
