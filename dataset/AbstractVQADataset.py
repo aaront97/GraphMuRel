@@ -44,24 +44,24 @@ class AbstractVQADataset(Dataset):
         self.word_to_wid = torch.load(os.path.join(self.processed_dir, 'word_to_wid.pth'))
         self.ans_to_aid = torch.load(os.path.join(self.processed_dir, 'ans_to_aid.pth'))
         self.aid_to_ans = torch.load(os.path.join(self.processed_dir, 'aid_to_ans.pth'))
-    
 
     def standardise(self, s):
         s = s.lower()
         s = s.rstrip()
-        for i in [r'\?',r'\!',r'\'',r'\"',r'\$',r'\:',r'\@',r'\(',r'\)',r'\,',r'\.',r'\;']:
+
+        # Remove punctuations
+        for i in [r'\?', r'\!', r'\'', r'\"', r'\$', r'\:',
+                  r'\@', r'\(', r'\)', r'\,', r'\.', r'\;']:
             s = re.sub(i, '', s)
+
+        # Substitute hyphens and slashes with spaces
+        for i in [r'\-',r'\/']:
+            s = re.sub(i, ' ', s)
         return s
 
     def tokenize(self, s):
-        # we don't replace # because # is used to refer to number of items
-        # Tokenizing code taken from Cadene
-        t_str = self.standardise(s)
-
-        for i in [r'\-',r'\/']:
-            t_str = re.sub( i, ' ', t_str)
-
-        q_list = re.sub(r'\?','',t_str.lower()).split(' ')
+        s = self.standardise(s)
+        q_list = s.split(' ')
         q_list = list(filter(lambda x: len(x) > 0, q_list))
         return q_list
 

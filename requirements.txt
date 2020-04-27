@@ -1,0 +1,12 @@
+block-bootstrap-pytorch
+bootsrap-pytorch
+jupyter
+numpy
+opencv-python
+skipthoughts
+tensorboardx
+torchvision
+torch
+torch-geometric
+torch-sparse
+pytest

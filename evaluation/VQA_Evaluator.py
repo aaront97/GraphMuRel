@@ -1,4 +1,6 @@
 import sys
+# clone the following repository: https://github.com/GT-Vision-Lab/VQA
+# and modify the below sys paths afterwards
 sys.path.insert(0, '/auto/homes/bat34/VQA/PythonHelperTools/vqaTools')
 sys.path.insert(0, '/auto/homes/bat34/VQA/PythonEvaluationTools')
 from vqa import VQA
