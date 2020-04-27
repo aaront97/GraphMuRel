@@ -48,6 +48,7 @@ def val_evaluate(config, model, epoch, val_loader,
                  RESULTS_FILE_PATH, device, criterion):
     model.eval()
     print('Running model on validation dataset..')
+    criterion = nn.NLLLoss() # eval on NLLLoss
     with torch.no_grad():
         results = []
         total_batch_loss = 0
@@ -64,17 +65,18 @@ def val_evaluate(config, model, epoch, val_loader,
                     #'id_weights': data['id_weights'].cuda()
             }
 
-            if 'murel' in config['name'] and config['use_graph_module']:
-                item['graph_batch'] = data['graph'].to(device)
+            if 'graph' in config['name'] and config['use_graph_module']:
+                item['graph_batch'] = data['graph_batch'].to(device)
 
             inputs = item
             qids = data['question_unique_id']
             outputs = model(inputs)
             labels = item['answer_id']
-            if config['loss_function'] == 'NLLLoss':
-                loss = criterion(outputs, labels)
-            else:
-                loss = criterion(outputs, item['id_unique'], item['id_weights'])
+            loss = criterion(outputs, labels)
+            #if config['loss_function'] == 'NLLLoss':
+            #    loss = criterion(outputs, labels)
+            #else:
+            #    loss = criterion(outputs, item['id_unique'], item['id_weights'])
 
             total_batch_loss += loss.item()
 
@@ -323,12 +325,12 @@ def train():
                     'answer_id': torch.squeeze(data['answer_id']).cuda(),
                     'question_lengths': data['question_lengths'].cuda(),
                     #'resnet_features': data['resnet_features'].cuda(),
-                    #'id_unique': data['id_unique'].cuda(),
-                    #'id_weights': data['id_weights'].cuda()
+                    'id_unique': data['id_unique'].cuda(),
+                    'id_weights': data['id_weights'].cuda()
             }
 
-            if 'murel' in config['name'] and config['use_graph_module']:
-                item['graph_batch'] = data['graph'].to(device)
+            if 'graph' in config['name'] and config['use_graph_module']:
+                item['graph_batch'] = data['graph_batch'].to(device)
 
 
             inputs, labels = item, item['answer_id']

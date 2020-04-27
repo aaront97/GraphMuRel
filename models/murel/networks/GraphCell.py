@@ -20,7 +20,7 @@ class GraphCell(nn.Module):
 
         return res
   
-    def __init__(self, in_channels, out_channels, config):
+    def __init__(self, config):
         super(GraphCell, self).__init__()
         self.fusion_factory = FusionFactory()
         fusion_features_cfg = config['fusion']['obj_features_question']
@@ -55,7 +55,7 @@ class GraphCell(nn.Module):
         # x = x + fused_question_object
         x = F.relu(x)
         x = self.gcn2(x, edge_index)
-        x = x + fused_question_object
+        # x = x + fused_question_object
         x = F.relu(x)
         x = self.gcn3(x, edge_index)
         return x

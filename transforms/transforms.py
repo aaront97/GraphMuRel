@@ -19,8 +19,8 @@ class BatchGraph:
 
     def __call__(self, batch):
         if isinstance(batch, collections.Mapping):
-            if 'graph' in batch:
-                batch['graph'] = Batch.from_data_list(batch['graph'])
+            if 'graph_batch' in batch:
+                batch['graph_batch'] = Batch.from_data_list(batch['graph_batch'])
         return batch
 
 # class PadQuestions:

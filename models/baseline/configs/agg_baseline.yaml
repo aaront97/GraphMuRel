@@ -1,6 +1,6 @@
 name: agg_concat_min_corrected_wid
 agg_type: min
-q_self_attention: False
+q_self_attention: True
 checkpoint_option: resume_last  #can be best, fresh, or resume_last
 checkpoint_dir:  '/local/scratch/bat34/baseline_trained_models'
 ROOT_DIR: /auto/homes/bat34/VQA_PartII/models/baseline/
@@ -43,7 +43,7 @@ fusion_block:
     rank: 15
     mm_dim: 1000
 fusion_mlp:
-    input_dims: [2400, 2048]
+    input_dims: [4800, 2048]
     out_dim: 3000
     dropout: 0.2
     hidden_list: [3200, 3200]

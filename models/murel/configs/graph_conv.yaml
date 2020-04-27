@@ -1,11 +1,13 @@
 name: graph_conv #murel_dropout #murel_cell_attention
-checkpoint_option: fresh #can be 'best' or 'fresh' or 'resume_last'
+checkpoint_option: resume_last #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
 checkpoint_dir: '/local/scratch/bat34/murel_trained_models' #'/auto/homes/bat34/VQA_PartII/models/murel/trained_models'
 bottom_up_features_dir: '/local/scratch/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
-include_keys: ['seed',
+graph_type: knn24
+include_keys: ['graph_type',
+               'seed',
                'loss_function',
                'txt_enc',
                'batch_size',
@@ -28,10 +30,10 @@ lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 epochs: 25
 checkpoint_every: 1
-num_workers: 4
+num_workers: 2
 unroll_steps: 3
 log_every: 50
-seed: 6969
+seed: 1337
 fusion_type: block
 use_graph_module: True
 use_pairwise: False
@@ -44,7 +46,7 @@ murel_cell_attention:
         input_dim: 512
         output_dim: 1
 graph:
-    graph_type: knn6
+    graph_type: knn24
     gcn1:
       input_dim: 2048
       output_dim: 1024
@@ -101,7 +103,7 @@ fusion:
         mm_dim: 200
     final_fusion:
         type: block
-        input_dims: [4800, 2048]
+        input_dims: [4800, 256]
         output_dims: 3000 #CHANGE WHEN CHANGING NANS
         dropout_prelin: 0.
         dropout_input: 0.1

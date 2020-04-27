@@ -6,6 +6,8 @@ skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits/'
 vqa_dir: '/auto/homes/bat34/VQA'
 checkpoint_option: resume_last #can be best, fresh, or resume_last
+graph: #Todo fix
+     graph_type: None
 include_keys: ['seed',
                'txt_enc',
                'batch_size',
@@ -16,19 +18,19 @@ include_keys: ['seed',
                'final_fusion_type']
 dropout: 0.2
 txt_enc: BayesianUniSkip
-seed: 1337
+seed: 42
 batch_size: 256
-loss_function: 'NLLLoss' # can be soft_cross_entropy or NLLLoss, remember to change RESULTS_FILE_PATH
+loss_function: 'soft_cross_entropy' # can be soft_cross_entropy or NLLLoss, remember to change RESULTS_FILE_PATH
 RESULTS_FILE_PATH: '/auto/homes/bat34/VQA_PartII/models/baseline/{}-temp.json'
 grad_clip: 0.25
-lr: 0.0001
+lr: 0.0003
 epochs: 25
 checkpoint_every: 1
 reduction_factor: 8
-num_workers: 8
+num_workers: 3
 log_every: 50
-gradual_warmup_steps: [0.5, 2.0, 5.0] #torch.linspace
-lr_decay_epochs: [10, 20, 2] #range
+gradual_warmup_steps: [0.5, 2.0, 7.0] #torch.linspace
+lr_decay_epochs: [14, 24, 2] #range
 lr_decay_rate: .25
 hidden_list: [1600, 1600]
 attention_fusion_type: block

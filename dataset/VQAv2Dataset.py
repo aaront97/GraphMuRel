@@ -34,19 +34,19 @@ class VQAv2Dataset(AbstractVQADataset):
         self.bottom_up_features_dir = bottom_up_features_dir
         self.split = split
         self.include_graph_data = include_graph_data
-
+        self.graph_dir = None
 
         if graph_type.startswith('knn'):
             no_neigh = int(graph_type.lstrip('knn'))
             print('You have picked nearest-neighbour graphs, with N = {}'.format(no_neigh))
             self.graph_dir = '/local/scratch/bat34/graphs' + \
-                             'graphs/preprocessed_graphs_knn_neighbours_{}/'.format(no_neigh)
+                             '/preprocessed_graphs_knn_neighbours_{}/'.format(no_neigh)
 
         if self.split == 'train':
             self.collate_fn = transforms.Compose([
                 transforms.ConvertBatchListToDict(),
                 transforms.Pad1DTensors(dict_keys=['question_ids']),
-                #transforms.Pad1DTensors(dict_keys=['question_ids', 'id_unique', 'id_weights']),
+                transforms.Pad1DTensors(dict_keys=['question_ids', 'id_unique', 'id_weights']),
                 transforms.BatchGraph(),
                 transforms.StackTensors(),
                 ]) if collate_fn is None else collate_fn
@@ -80,13 +80,13 @@ class VQAv2Dataset(AbstractVQADataset):
         item['object_features_list'] = dict_features['pooled_feat']
         if self.graph_dir:
             graph_img_name = os.path.join(self.graph_dir, image_name + '.pth')
-            item['graph'] = torch.load(graph_img_name)
+            item['graph_batch'] = torch.load(graph_img_name)
         if self.split != 'test':
             annotation = self.dataset['annotations'][idx]
             item['answer_id'] = torch.LongTensor([annotation['answer_id']])
             item['answer'] = annotation['most_frequent_answer']
             item['question_type'] = annotation['question_type']
-        #if self.split == 'train':
-        #    item['id_weights'] = annotation['id_weights']
-        #    item['id_unique'] = annotation['id_unique']
+        if self.split == 'train':
+            item['id_weights'] = annotation['id_weights']
+            item['id_unique'] = annotation['id_unique']
         return item
