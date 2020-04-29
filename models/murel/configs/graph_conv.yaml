@@ -1,11 +1,13 @@
-name: graph_conv #murel_dropout #murel_cell_attention
+#name: graph_conv
+name:  gat_conv
+#name: graphconv_skip
 checkpoint_option: resume_last #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
 checkpoint_dir: '/local/scratch/bat34/murel_trained_models' #'/auto/homes/bat34/VQA_PartII/models/murel/trained_models'
 bottom_up_features_dir: '/local/scratch/bat34/2018-04-27_bottom-up-attention_fixed_36/'
 skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
-graph_type: knn24
+graph_type: knn6
 include_keys: ['graph_type',
                'seed',
                'loss_function',
@@ -46,16 +48,11 @@ murel_cell_attention:
         input_dim: 512
         output_dim: 1
 graph:
-    graph_type: knn24
-    gcn1:
-      input_dim: 2048
-      output_dim: 1024
-    gcn2:
-      input_dim: 1024
-      output_dim: 512
-    gcn3:
-      input_dim: 512
-      output_dim: 256
+    graph_layer_type: gatconv
+    graph_type: knn6
+    graph_hidden_list: [1024]
+    input_dim: 2048 #fixed
+    output_dim: 512
 q_att:
     linear0:
         input_dim: 2400

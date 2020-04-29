@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from fusion.factory.FusionFactory import FusionFactory
 from torch_geometric.nn import GCNConv
+from models.murel.networks.GraphLayerFactory import GraphLayerFactory
 
 class GraphCell(nn.Module):
     def fuse_object_features_with_questions(self,
@@ -22,16 +23,21 @@ class GraphCell(nn.Module):
   
     def __init__(self, config):
         super(GraphCell, self).__init__()
-        self.fusion_factory = FusionFactory()
+        fusion_factory = FusionFactory()
+        graph_layer_factory = GraphLayerFactory()
         fusion_features_cfg = config['fusion']['obj_features_question']
-        self.fusion_features = self.fusion_factory.create_fusion(fusion_features_cfg)
+        self.fusion_features = fusion_factory.create_fusion(fusion_features_cfg)
         graph_cfg = config['graph']
-        self.gcn1 = GCNConv(graph_cfg['gcn1']['input_dim'],
-                            graph_cfg['gcn1']['output_dim'])
-        self.gcn2 = GCNConv(graph_cfg['gcn2']['input_dim'],
-                            graph_cfg['gcn2']['output_dim'])
-        self.gcn3 = GCNConv(graph_cfg['gcn3']['input_dim'],
-                            graph_cfg['gcn3']['output_dim'])
+        graph_layer = graph_layer_factory.get_graph_layer(config['graph'])
+
+        self.graph_hidden_list = nn.ModuleList([graph_layer(graph_cfg['input_dim'],
+                                                            graph_cfg['graph_hidden_list'][0])])
+        if len(graph_cfg['graph_hidden_list']) > 1:
+            for length1, length2 in zip(graph_cfg['graph_hidden_list'][:-1], graph_cfg['graph_hidden_list'][1:]):
+                self.graph_hidden_list.append(graph_layer(length1, length2))
+
+        self.last_layer = graph_layer(self.graph_hidden_list[-1], graph_cfg['output_dim'])
+
 
     def forward(self,
                 question_embedding,
@@ -45,17 +51,11 @@ class GraphCell(nn.Module):
                     question_embedding,
                     batch_size,
                     num_obj)
-        # (batch_size x num_obj x obj_features) -->
-        # (batch_size * num_obj x obj_features)
-#        fused_question_object = fused_question_object.view(
-#                batch_size * num_obj, -1)
+
         x = fused_question_object
         edge_index, batch = data.edge_index, data.batch
-        x = self.gcn1(x, edge_index)
-        # x = x + fused_question_object
-        x = F.relu(x)
-        x = self.gcn2(x, edge_index)
-        # x = x + fused_question_object
-        x = F.relu(x)
-        x = self.gcn3(x, edge_index)
+        for layer in self.graph_hidden_list:
+            x = layer(x, edge_index)
+            x = F.relu(x)
+        x = self.last_layer(x)
         return x
