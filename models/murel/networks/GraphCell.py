@@ -28,14 +28,17 @@ class GraphCell(nn.Module):
         fusion_features_cfg = config['fusion']['obj_features_question']
         self.fusion_features = fusion_factory.create_fusion(fusion_features_cfg)
         graph_cfg = config['graph']
+        kwargs = graph_cfg['kwargs']
         graph_layer = graph_layer_factory.get_graph_layer(config['graph'])
 
         self.graph_hidden_list = nn.ModuleList([graph_layer(graph_cfg['input_dim'],
-                                                            graph_cfg['graph_hidden_list'][0])])
+                                                            graph_cfg['graph_hidden_list'][0],
+                                                            **kwargs
+                                                            )])
         if len(graph_cfg['graph_hidden_list']) > 1:
             for length1, length2 in zip(graph_cfg['graph_hidden_list'][:-1], graph_cfg['graph_hidden_list'][1:]):
-                self.graph_hidden_list.append(graph_layer(length1, length2))
-        self.last_layer = graph_layer(graph_cfg['graph_hidden_list'][-1], graph_cfg['output_dim'])
+                self.graph_hidden_list.append(graph_layer(length1, length2, **kwargs))
+        self.last_layer = graph_layer(graph_cfg['graph_hidden_list'][-1], graph_cfg['output_dim'], **kwargs)
 
 
     def forward(self,

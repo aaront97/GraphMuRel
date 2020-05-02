@@ -9,6 +9,7 @@ skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
 graph_type: knn6
 include_keys: ['graph_type',
+               'graph:kwargs',
                'seed',
                'loss_function',
                'txt_enc',
@@ -53,6 +54,9 @@ graph:
     graph_hidden_list: [1024, 512]
     input_dim: 2048 #fixed
     output_dim: 400
+    #kwargs: {}
+    kwargs:
+        heads: 4
 q_att:
     linear0:
         input_dim: 2400

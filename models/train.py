@@ -3,9 +3,7 @@ import random
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import os
-import yaml
 from dataset.VQAv2Dataset import VQAv2Dataset
-from models.murel.networks.MurelNet import MurelNet
 from tensorboardX import SummaryWriter
 import tqdm
 import subprocess
@@ -39,7 +37,13 @@ def create_tsbd_summary_writer(model, loader, logdir):
 def get_model_summary_name(config, chosen_keys):
     res = config['name']
     for key in chosen_keys:
-        res += "_{}_{}".format(key, config[key])
+        # Delimiter for dict keys
+        key = key.split(':')
+        value = config
+        for s in key:
+            res += '_{}'.format(s)
+            value = value[s]
+        res += "_{}".format(value)
     return res
 
 
