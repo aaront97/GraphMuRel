@@ -12,7 +12,7 @@ class GraphLayerFactory:
             return GCNConv
         elif config['graph_layer_type'] == 'gatconv':
             return GATConv
-        elif config['graph_layer_type'] == 'GraphConv':
+        elif config['graph_layer_type'] == 'graphconv':
             return GraphConv
         else:
             raise ValueError('Unrecognised graph layer type. Current available layers: GCN, GAT, GraphConv.')

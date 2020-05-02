@@ -35,8 +35,7 @@ class GraphCell(nn.Module):
         if len(graph_cfg['graph_hidden_list']) > 1:
             for length1, length2 in zip(graph_cfg['graph_hidden_list'][:-1], graph_cfg['graph_hidden_list'][1:]):
                 self.graph_hidden_list.append(graph_layer(length1, length2))
-
-        self.last_layer = graph_layer(self.graph_hidden_list[-1], graph_cfg['output_dim'])
+        self.last_layer = graph_layer(graph_cfg['graph_hidden_list'][-1], graph_cfg['output_dim'])
 
 
     def forward(self,
@@ -57,5 +56,5 @@ class GraphCell(nn.Module):
         for layer in self.graph_hidden_list:
             x = layer(x, edge_index)
             x = F.relu(x)
-        x = self.last_layer(x)
+        x = self.last_layer(x, edge_index)
         return x
