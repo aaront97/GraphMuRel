@@ -175,6 +175,7 @@ def get_dirs(config, include_keys=[]):
     root_dir = config['checkpoint_dir']
     #model_name = config['name']
     model_name = get_model_summary_name(config, include_keys)
+    print(model_name)
     # for key in include_keys:
     #     model_name += "_{}_{}".format(key, config[key])
     log_dir = os.path.join(root_dir, 'logs', model_name)

@@ -1,4 +1,4 @@
-name:  graph_gat3_conv
+name:  graph_gat2_conv
 #name: graph_graph_conv
 #name: graph_gcn_conv
 checkpoint_option: fresh #can be 'best' or 'fresh' or 'resume_last'
@@ -51,9 +51,9 @@ murel_cell_attention:
 graph:
     graph_layer_type: gatconv #gatconv, gcnconv, graphconv
     graph_type: knn6
-    graph_hidden_list: [1024, 512]
+    graph_hidden_list: [256]
     input_dim: 2048 #fixed
-    output_dim: 400
+    output_dim: 512
     #kwargs: {}
     kwargs:
         heads: 4
@@ -104,7 +104,7 @@ fusion:
         mm_dim: 200
     final_fusion:
         type: block
-        input_dims: [4800, 400]
+        input_dims: [4800, 512]
         output_dims: 3000 #CHANGE WHEN CHANGING NANS
         dropout_prelin: 0.
         dropout_input: 0.1
