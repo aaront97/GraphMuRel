@@ -348,8 +348,8 @@ def train():
             total_batch_loss += loss.item()
             loss = loss / reduction_factor
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(),
-                                           config['grad_clip'])
+            # torch.nn.utils.clip_grad_norm_(model.parameters(),
+            #                                config['grad_clip'])
             if local_iteration % reduction_factor == 0:
                 optimizer.step()
                 optimizer.zero_grad()

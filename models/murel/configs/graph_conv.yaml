@@ -1,4 +1,4 @@
-name:  graph_gat2_conv
+name:  graph_gat3_manual_skipconn_conv
 #name: graph_graph_conv
 #name: graph_gcn_conv
 checkpoint_option: resume_last #can be 'best' or 'fresh' or 'resume_last'
@@ -9,7 +9,7 @@ skipthoughts_dir: '/auto/homes/bat34/VQA_PartII/data/skipthoughts'
 processed_dir: '/auto/homes/bat34/VQA_PartII/data/processed_splits'
 graph_type: knn6
 include_keys: ['graph_type',
-               'graph:kwargs',
+               'graph:layer_specify_method',
                'seed',
                'loss_function',
                'txt_enc',
@@ -49,6 +49,7 @@ murel_cell_attention:
         input_dim: 512
         output_dim: 1
 graph:
+    layer_specify_method: manual
     graph_layer_type: gatconv #gatconv, gcnconv, graphconv
     graph_type: knn6
     graph_hidden_list: [512]
