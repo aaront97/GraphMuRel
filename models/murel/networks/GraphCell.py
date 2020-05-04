@@ -38,7 +38,8 @@ class GraphCell(nn.Module):
         if len(graph_cfg['graph_hidden_list']) > 1:
             for length1, length2 in zip(graph_cfg['graph_hidden_list'][:-1], graph_cfg['graph_hidden_list'][1:]):
                 self.graph_hidden_list.append(graph_layer(length1, length2, **kwargs))
-        self.last_layer = graph_layer(graph_cfg['graph_hidden_list'][-1], graph_cfg['output_dim'], **kwargs)
+        kwargs['concat'] = False
+        self.last_layer = graph_layer(graph_cfg['graph_hidden_list'][-1] * kwargs['heads'] if 'heads' in kwargs else graph_cfg['graph_hidden_list'][-1], graph_cfg['output_dim'], **kwargs)
 
 
     def forward(self,

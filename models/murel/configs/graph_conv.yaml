@@ -1,7 +1,7 @@
 name:  graph_gat2_conv
 #name: graph_graph_conv
 #name: graph_gcn_conv
-checkpoint_option: fresh #can be 'best' or 'fresh' or 'resume_last'
+checkpoint_option: resume_last #can be 'best' or 'fresh' or 'resume_last'
 ROOT_DIR: '/auto/homes/bat34/VQA_PartII/models/murel'
 checkpoint_dir: '/local/scratch/bat34/murel_trained_models' #'/auto/homes/bat34/VQA_PartII/models/murel/trained_models'
 bottom_up_features_dir: '/local/scratch/bat34/2018-04-27_bottom-up-attention_fixed_36/'
@@ -51,12 +51,12 @@ murel_cell_attention:
 graph:
     graph_layer_type: gatconv #gatconv, gcnconv, graphconv
     graph_type: knn6
-    graph_hidden_list: [256]
+    graph_hidden_list: [512]
     input_dim: 2048 #fixed
     output_dim: 512
     #kwargs: {}
     kwargs:
-        heads: 4
+        heads: 2
 q_att:
     linear0:
         input_dim: 2400
