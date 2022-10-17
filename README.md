@@ -1,4 +1,4 @@
-# VQA_PartII
+# GraphMuRel
 Cambridge CS Part II Project 2019.
 
 Source code that reimplements MuRel and extends it to use graph networks.
